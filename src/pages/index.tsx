@@ -64,12 +64,12 @@ export default function Home() {
                     <div className="flex flex-col gap-10 w-full">
                         <ItemCarousel title="Editor's Pick" stepSize={228} viewAll="/category/editor">
                             {editorsPick.map((cosmetic) => (
-                                <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
+                                <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
                             ))}
                         </ItemCarousel>
                         <ItemCarousel title="Newest" stepSize={228} viewAll="/search?sort=newest">
                             {newest.map((cosmetic) => (
-                                <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
+                                <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
                             ))}
                         </ItemCarousel>
                     </div>

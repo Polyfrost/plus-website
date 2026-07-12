@@ -185,7 +185,7 @@ export default function Items() {
                         <div className="flex flex-col">
                             <div className="flex flex-row flex-wrap min-[1130px]:gap-x-12 min-[1130px]:justify-start justify-center gap-x-4 gap-y-8">
                                 {items.map((cosmetic) => (
-                                    <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
+                                    <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
                                 ))}
                             </div>
                             {items.length > 0 && currentPage < pages && !paginating && <div ref={ref} className="flex h-0.5 w-full" />}

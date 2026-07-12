@@ -6,6 +6,7 @@ export type Item = {
     createdAt: string;
     id: number;
     assetId: number;
+    coverAssetId: number;
     tags: string[];
     type: string;
     priceId?: string;

@@ -93,7 +93,7 @@ export default function Checkout() {
                     <div className="flex min-[900px]:flex-row flex-col gap-8 w-full">
                         <div className="flex flex-col gap-3 min-[900px]:w-2/3 w-full pb-5">
                             {cart?.items!.map((item) => (
-                                <ItemListCard key={item.id} name={item.name} description={item.description} id={item.id} price={item.price} discount={item.discount} />
+                                <ItemListCard key={item.id} name={item.name} description={item.description} id={item.id} coverId={item.coverAssetId} price={item.price} discount={item.discount} />
                             ))}
                         </div>
                         <div className="flex flex-col gap-5 min-[900px]:w-1/3 w-full">
@@ -163,7 +163,7 @@ export default function Checkout() {
                 <div className="max-w-273 mx-auto flex flex-col justify-center items-center min-[1130px]:px-0 px-4 pt-10 pb-15">
                     <ItemCarousel title="Discover More Cosmetics" stepSize={228}>
                         {editorsPick.map((cosmetic) => (
-                            <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
+                            <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
                         ))}
                     </ItemCarousel>
                 </div>

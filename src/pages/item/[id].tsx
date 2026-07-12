@@ -151,7 +151,7 @@ export default function Id() {
                 <div className="max-w-273 mx-auto flex flex-col justify-center items-center min-[1130px]:px-0 px-4 pt-10">
                     <ItemCarousel title="Similar Cosmetics" stepSize={228}>
                         {similarCosmetics.map((cosmetic) => (
-                            <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
+                            <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
                         ))}
                     </ItemCarousel>
                 </div>

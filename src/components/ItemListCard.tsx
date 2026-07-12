@@ -1,7 +1,7 @@
 import { useCart } from "@/context/CartContext";
 import Trash from "./icons/Trash";
 
-export default function ItemListCard({ name, description, id, price, discount }: { name: string; description: string; id: number; price: number; discount?: number }) {
+export default function ItemListCard({ name, description, id, coverId, price, discount }: { name: string; description: string; id: number; coverId: number; price: number; discount?: number }) {
     const cart = useCart();
 
     return (
@@ -9,7 +9,7 @@ export default function ItemListCard({ name, description, id, price, discount }:
             <div className="absolute inset-0 rounded-xl bg-linear-to-b from-white/5 to-transparent" />
             <div className="flex flex-row gap-4">
                 <div className="h-14.5 w-fit bg-neutral-300/10 rounded-lg shrink-0">
-                    <img className="rounded-[5px] h-14.5 border border-white/10 light:border-white/90" src="/placeholder.png" />
+                    <img className="rounded-[5px] h-14.5 w-14.5 border border-white/10 light:border-white/90 object-cover" src={`${process.env.BACKEND_URL}/asset/${coverId}`} />
                 </div>
                 <div className="flex flex-row justify-between w-full">
                     <div className="flex flex-col">

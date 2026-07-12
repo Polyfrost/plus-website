@@ -3,7 +3,7 @@ import Cart from "./icons/Cart";
 import { useCart } from "@/context/CartContext";
 import Check from "./icons/Check";
 
-export default function ItemCard({ name, newItem, id, price, discount }: { name: string; newItem?: boolean; id: number; price: number; discount?: number }) {
+export default function ItemCard({ name, newItem, id, coverId, price, discount }: { name: string; newItem?: boolean; id: number; coverId: number; price: number; discount?: number }) {
     const router = useRouter();
     const cart = useCart();
 
@@ -24,7 +24,7 @@ export default function ItemCard({ name, newItem, id, price, discount }: { name:
                 )}
                 <div className="flex flex-col gap-1.5 px-4 pt-4 pb-2.5">
                     <div className="h-40 w-full bg-neutral-300/10 rounded-lg">
-                        <img className="rounded-[5px] h-40 border border-white/10 light:border-white/90" src="/placeholder.png" />
+                        <img className="rounded-[5px] h-40 w-full border border-white/10 light:border-white/90 object-cover" src={`${process.env.BACKEND_URL}/asset/${coverId}`} />
                     </div>
                     <div className="flex flex-col text-start">
                         <h1 className="text-text light:text-black text-sm leading-6 truncate">{name}</h1>
