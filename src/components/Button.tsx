@@ -30,7 +30,7 @@ export default function Button({
         <button
             onClick={onClick}
             disabled={disabled}
-            className={`${buttonColor()} ${className} disabled:brightness-50 disabled:cursor-not-allowed border relative rounded-md shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] select-none`}
+            className={`${buttonColor()} ${className} disabled:opacity-50 disabled:cursor-not-allowed border relative rounded-md shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] select-none`}
             style={{ paddingRight: addedWidth, paddingLeft: addedWidth }}
         >
             {label ? (

@@ -10,7 +10,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const [navRef, atTop] = useInView({ initialInView: true });
 
     return (
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <CartProvider>
                 <Navbar atTop={atTop} />
                 <div ref={navRef} />

@@ -9,7 +9,7 @@ export default function ItemCard({ name, newItem, id, coverId, price, discount }
 
     return (
         <div
-            className={`cursor-pointer flex flex-col h-fit ${discount ? "border border-green" : "border border-white/30 light:border-white/80"} relative bg-primary/35 light:bg-primary-light/35 backdrop-blur-[32px] rounded-xl shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] w-45 shrink-0`}
+            className={`cursor-pointer flex flex-col h-fit ${discount ? "border border-green" : "border border-white/30 light:border-white/80"} relative bg-primary/35 hover:bg-primary/70 light:bg-primary-light/35 light:hover:bg-primary-light/70 duration-300 backdrop-blur-[32px] rounded-xl shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] w-45 shrink-0`}
         >
             <button onClick={() => router.push(`/item/${id}`)} className="flex flex-col w-full">
                 {newItem && (
