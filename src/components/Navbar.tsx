@@ -30,7 +30,7 @@ export default function Navbar({ atTop }: { atTop: boolean }) {
                 <div className={`max-w-273 w-full flex flex-col transition-all duration-300 ease-out ${atTop ? "min-[940px]:gap-8 gap-3" : "min-[940px]:gap-6 gap-3"} min-[1130px]:px-0 px-4`}>
                     <div className="flex flex-row items-center justify-between gap-4">
                         <button onClick={() => router.push("/")} className="flex">
-                            <Logo className="w-fit h-8 self-center" />
+                            <Logo className="w-auto h-8 self-center" />
                         </button>
                         <TextInput
                             icon={<Search className="w-4 h-4 text-white/50 light:text-black/50" />}

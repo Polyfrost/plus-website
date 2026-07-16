@@ -7,10 +7,10 @@ export default function Footer() {
             <div className="flex max-w-273 mx-auto w-full flex-col min-[1130px]:px-0 px-4">
                 <div className="flex min-[800px]:flex-row flex-col items-start justify-between gap-4 min-[800px]:pb-20 pb-6">
                     <div className="flex flex-col gap-1">
-                        <Logo className="h-8 w-full" />
+                        <Logo className="h-8 w-auto" />
                         <div className="flex flex-row items-center gap-2 pl-1">
                             <p className="text-[#2567D8]/75 text-[13px]">by</p>
-                            <PolyLogo className="h-5 w-fit" />
+                            <PolyLogo className="h-5 w-auto" />
                         </div>
                     </div>
                     <div className="flex min-[800px]:flex-row flex-col items-start gap-x-14 gap-y-6">
