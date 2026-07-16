@@ -67,9 +67,9 @@ export default function Id() {
         skinViewer.zoom = cosmetic.type === "wings" ? 0.55 : 0.75;
 
         if (cosmetic.type === "cape") {
-            skinViewer.loadCape(`https://plus-staging.polyfrost.org/asset/${cosmetic.assetId}`);
+            skinViewer.loadCape(`${process.env.BACKEND_URL}/asset/${cosmetic.assetId}`);
         } else {
-            loadCosmeticFromZip(skinViewer, `https://plus-staging.polyfrost.org/asset/${cosmetic.assetId}`, { type: cosmetic.type as any });
+            loadCosmeticFromZip(skinViewer, `${process.env.BACKEND_URL}/asset/${cosmetic.assetId}`, { type: cosmetic.type as any });
         }
 
         const observer = new ResizeObserver(([entry]) => {
