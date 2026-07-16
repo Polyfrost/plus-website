@@ -16,6 +16,10 @@
     --color-primary-light: #ebf2ff;
 }
 
+@utility glow {
+    background-image: radial-gradient(closest-side, rgb(24 120 241 / 0.15) 45%, rgb(24 120 241 / 0) 100%);
+}
+
 body {
     background: #11171c;
     color: white;

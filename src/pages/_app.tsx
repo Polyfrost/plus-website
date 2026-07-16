@@ -16,9 +16,11 @@ export default function App({ Component, pageProps }: AppProps) {
                 <div ref={navRef} />
                 <div className="overflow-hidden overflow-y-hidden relative flex flex-col">
                     <div className="max-w-273 mx-auto flex flex-col justify-center items-center relative -z-10">
-                        <div className="absolute h-350 w-350 translate-y-30 blur-[175px] -z-10 rounded-full bg-accent/15" />
-                        <div className="absolute h-350 w-350 translate-y-275 translate-x-250 blur-[175px] -z-10 rounded-full bg-accent/15" />
-                        <div className="absolute h-350 w-350 translate-y-400 -translate-x-200 blur-[175px] -z-10 rounded-full bg-accent/15" />
+                        {/* Boxes are 1928px (h-482) and translates are offset by -66 (=264px)
+                            from the old 1400px discs, so each glow stays centred where it was. */}
+                        <div className="absolute h-482 w-482 -translate-x-66 -translate-y-36 -z-10 glow" />
+                        <div className="absolute h-482 w-482 translate-x-184 translate-y-209 -z-10 glow" />
+                        <div className="absolute h-482 w-482 -translate-x-266 translate-y-334 -z-10 glow" />
                     </div>
                     <Component {...pageProps} />
                     <Footer />
