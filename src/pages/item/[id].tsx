@@ -175,7 +175,7 @@ export default function Id() {
                                     <div className="flex flex-row flex-wrap gap-2">
                                         {cosmetic.variants.map((variant, index) => (
                                             <button
-                                                className={`${selectedVariant === index ? "bg-blue border-blue-400/30" : "bg-primary/50 light:bg-primary-light/50 border-white/30 light:border-white/80"} duration-300 relative p-2 rounded-md shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] select-none`}
+                                                className={`${selectedVariant === index ? "bg-blue border-blue-400/30" : "bg-primary/50 light:bg-primary-light/50 border-white/30 light:border-white/80"} border duration-300 relative p-2 rounded-md shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] select-none`}
                                                 onClick={() => setSelectedVariant(index)}
                                                 key={variant.id}
                                             >
@@ -186,7 +186,7 @@ export default function Id() {
                                                             src={`${process.env.BACKEND_URL}/asset/${variant.coverAssetId}`}
                                                         />
                                                     </div>
-                                                    <p className="text-text light:text-black text-sm leading-6 whitespace-nowrap truncate">{variant.name || "Default"}</p>
+                                                    <p className={`${selectedVariant === index ? "text-text" : "text-text light:text-black"} text-sm leading-6 whitespace-nowrap duration-300`}>{variant.name || "Default"}</p>
                                                 </div>
                                             </button>
                                         ))}
