@@ -2,6 +2,8 @@ import CollectionCard from "@/components/CollectionCard";
 import CollectionCarousel from "@/components/CollectionCarousel";
 import ItemCard from "@/components/ItemCard";
 import ItemCarousel from "@/components/ItemCarousel";
+import LoadingCollectionCard from "@/components/LoadingCollectionCard";
+import LoadingItemCard from "@/components/LoadingItemCard";
 import { Collection } from "@/types/Collection";
 import { Item } from "@/types/Item";
 import { getCollections, searchCosmetics } from "@/utils/APIUtils";
@@ -23,6 +25,7 @@ export default function Home() {
         fetchCollections();
     }, []);
 
+    
     useEffect(() => {
         async function fetchEditorsPick() {
             const cosmeticsData = await searchCosmetics({ tags: "editor" });
@@ -53,9 +56,19 @@ export default function Home() {
             <section className="relative overflow-hidden">
                 <div className="max-w-273 mx-auto flex flex-col justify-center items-center pt-10 min-[1130px]:px-0 px-4">
                     <ItemCarousel title="Collections" stepSize={380}>
-                        {collections.map((collection) => (
-                            <CollectionCard key={collection.id} size="small" focused title={collection.name} id={collection.id} assetId={collection.assetId} />
-                        ))}
+                        {collections.length > 0 ? (
+                            <>
+                                {collections.map((collection) => (
+                                    <CollectionCard key={collection.id} size="small" focused title={collection.name} id={collection.id} assetId={collection.assetId} />
+                                ))}
+                            </>
+                        ) : (
+                            <>
+                                {Array.from({ length: 10 }).map((_, index) => (
+                                    <LoadingCollectionCard key={index} size="small" />
+                                ))}
+                            </>
+                        )}
                     </ItemCarousel>
                 </div>
             </section>
@@ -63,14 +76,34 @@ export default function Home() {
                 <div className="max-w-273 mx-auto flex flex-col justify-center items-center py-15 min-[1130px]:px-0 px-4">
                     <div className="flex flex-col gap-10 w-full">
                         <ItemCarousel title="Editor's Pick" stepSize={228} viewAll="/category/editor">
-                            {editorsPick.map((cosmetic) => (
-                                <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
-                            ))}
+                            {editorsPick.length > 0 ? (
+                                <>
+                                    {editorsPick.map((cosmetic) => (
+                                        <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
+                                    ))}
+                                </>
+                            ) : (
+                                <>
+                                    {Array.from({ length: 10 }).map((_, index) => (
+                                        <LoadingItemCard key={index} />
+                                    ))}
+                                </>
+                            )}
                         </ItemCarousel>
                         <ItemCarousel title="Newest" stepSize={228} viewAll="/search?sort=newest">
-                            {newest.map((cosmetic) => (
-                                <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
-                            ))}
+                            {newest.length > 0 ? (
+                                <>
+                                    {newest.map((cosmetic) => (
+                                        <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
+                                    ))}
+                                </>
+                            ) : (
+                                <>
+                                    {Array.from({ length: 10 }).map((_, index) => (
+                                        <LoadingItemCard key={index} />
+                                    ))}
+                                </>
+                            )}
                         </ItemCarousel>
                     </div>
                 </div>

@@ -9,6 +9,7 @@ import { useRouter } from "next/router";
 import { isNewItem } from "@/utils/TimeUtils";
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
+import LoadingItemCard from "@/components/LoadingItemCard";
 
 export default function Search() {
     const router = useRouter();
@@ -21,6 +22,7 @@ export default function Search() {
     const [pages, setPages] = useState<number>(1);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalItems, setTotalItems] = useState<number>(0);
+    const [loading, setLoading] = useState<boolean>(true);
 
     const [tags, setTags] = useState<ItemTag[]>([]);
 
@@ -42,12 +44,14 @@ export default function Search() {
 
     const handleCosmeticSearch = async (page: number) => {
         setPaginating(true);
+        setLoading(true);
         const cosmeticData = await searchCosmetics({ text: text, sort: sort, tags: [...selectedTags, ...selectedColors].join(","), types: selectedTypes.join(","), nb: 12, page });
         setItems((prev) => (page === 1 ? cosmeticData.items : [...prev, ...cosmeticData.items]));
         setPages(cosmeticData.pages);
         setTotalItems(cosmeticData.total);
         setCurrentPage(page);
         setPaginating(false);
+        setLoading(false);
     };
 
     useEffect(() => {
@@ -150,9 +154,19 @@ export default function Search() {
                         </div>
                         <div className="flex flex-col">
                             <div className="flex flex-row flex-wrap min-[1130px]:gap-x-12 min-[1130px]:justify-start justify-center gap-x-4 gap-y-8">
-                                {items.map((cosmetic) => (
-                                    <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
-                                ))}
+                                {!loading ? (
+                                    <>
+                                        {items.map((cosmetic) => (
+                                            <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
+                                        ))}
+                                    </>
+                                ) : (
+                                    <>
+                                        {Array.from({ length: 8 }).map((_, index) => (
+                                            <LoadingItemCard key={index} />
+                                        ))}
+                                    </>
+                                )}
                             </div>
                             {items.length > 0 && currentPage < pages && !paginating && <div ref={ref} className="flex h-0.5 w-full" />}
                         </div>

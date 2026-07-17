@@ -15,7 +15,7 @@
         "react": "19.2.4",
         "react-dom": "19.2.4",
         "react-intersection-observer": "^10.0.3",
-        "skinview3d": "github:Polyfrost/skinview3d#e1444ea37fbdf8b36acf08f653569d5789b4004c"
+        "skinview3d": "github:Polyfrost/skinview3d#6ae54c07636b14f0bbd7be16640a2fe6e2f1605f"
     },
     "devDependencies": {
         "@tailwindcss/postcss": "^4",

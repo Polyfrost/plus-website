@@ -58,7 +58,7 @@ export default function Navbar({ atTop }: { atTop: boolean }) {
                                 className="w-fit"
                                 onClick={toggleTheme}
                             />
-                            <Button icon={<Login className="w-4 h-4 text-text light:text-black" />} label="Login" color="primary" className="w-fit" onClick={() => void 0} />
+                            {/* <Button icon={<Login className="w-4 h-4 text-text light:text-black" />} label="Login" color="primary" className="w-fit" onClick={() => void 0} /> */}
                             <Button
                                 icon={
                                     <>
@@ -96,7 +96,7 @@ export default function Navbar({ atTop }: { atTop: boolean }) {
                             />
                             <div className="flex flex-row gap-3 w-full">
                                 <Button icon={<Night className="w-5 h-5 text-text light:text-black" />} color="primary" className="w-fit" onClick={toggleTheme} />
-                                <Button icon={<Login className="w-4 h-4 text-text light:text-black" />} label="Login" color="primary" className="w-full" onClick={() => void 0} />
+                                {/* <Button icon={<Login className="w-4 h-4 text-text light:text-black" />} label="Login" color="primary" className="w-full" onClick={() => void 0} /> */}
                                 <Button
                                     icon={
                                         <div className="relative">
@@ -115,17 +115,15 @@ export default function Navbar({ atTop }: { atTop: boolean }) {
                         </div>
                     )}
                     <div className={`w-full overflow-x-scroll overflow-y-hidden ${extended ? "" : "min-[940px]:flex hidden scrollbar-none"}`}>
-                        <div className={`flex flex-row justify-between ease-out w-full min-[940px]:gap-0 gap-6`}>
-                            <NavbarTypeButton atTop={atTop} extended={extended} image="/pets.png" name="Capes" nav="/type/cape" />
-                            <NavbarTypeButton atTop={atTop} extended={extended} image="/pets.png" name="Emotes" nav="/type/emote" />
-                            <NavbarTypeButton atTop={atTop} extended={extended} image="/pets.png" name="Wings" nav="/type/wings" />
-                            <NavbarTypeButton atTop={atTop} extended={extended} image="/pets.png" name="Gloves" nav="/type/glove" />
-                            <NavbarTypeButton atTop={atTop} extended={extended} image="/pets.png" name="Hats" nav="/type/hat" />
-                            <NavbarTypeButton atTop={atTop} extended={extended} image="/pets.png" name="Boots" nav="/type/boots" />
-                            <NavbarTypeButton atTop={atTop} extended={extended} image="/pets.png" name="Backpacks" nav="/type/backpack" />
-                            <NavbarTypeButton atTop={atTop} extended={extended} image="/pets.png" name="Glasses" nav="/type/glasses" />
-                            <NavbarTypeButton atTop={atTop} extended={extended} image="/pets.png" name="Shoulders" nav="/type/shoulder" />
-                            <NavbarTypeButton atTop={atTop} extended={extended} image="/pets.png" name="Auras" nav="/type/aura" />
+                        <div className={`flex flex-row justify-between ease-out w-full min-[940px]:gap-0 gap-6 pb-0.5`}>
+                            <NavbarTypeButton atTop={atTop} extended={extended} image="/capes.png" name="Capes" nav="/type/cape" />
+                            <NavbarTypeButton atTop={atTop} extended={extended} image="/wings.png" name="Wings" nav="/type/wings" />
+                            <NavbarTypeButton atTop={atTop} extended={extended} image="/gloves.png" name="Gloves" nav="/type/glove" />
+                            <NavbarTypeButton atTop={atTop} extended={extended} image="/hats.png" name="Hats" nav="/type/hat" />
+                            <NavbarTypeButton atTop={atTop} extended={extended} image="/boots.png" name="Boots" nav="/type/boots" />
+                            <NavbarTypeButton atTop={atTop} extended={extended} image="/backpacks.png" name="Backpacks" nav="/type/backpack" />
+                            <NavbarTypeButton atTop={atTop} extended={extended} image="/shoulders.png" name="Shoulders" nav="/type/shoulder" />
+                            <NavbarTypeButton atTop={atTop} extended={extended} image="/auras.png" name="Auras" nav="/type/aura" />
                         </div>
                     </div>
                 </div>

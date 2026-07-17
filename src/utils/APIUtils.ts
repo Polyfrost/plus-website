@@ -43,6 +43,12 @@ export async function getCosmeticById(id: number): Promise<Item> {
             tags: [...json.tags.custom, ...json.tags.colors],
             type: json.type,
             priceId: json.stripe_price_id,
+            variants: json.variants?.map((variant: any) => ({
+                id: variant.id,
+                name: variant.variant_name,
+                assetId: variant.asset_id,
+                coverAssetId: variant.cover_asset_id,
+            })),
         };
     } else {
         throw new Error("Failed to fetch cosmetic");
@@ -65,6 +71,12 @@ export async function searchCosmetics(queryItems: { [key: string]: string | numb
                 coverAssetId: cosmetic.cover_asset_id,
                 tags: [...cosmetic.tags.custom, ...cosmetic.tags.colors],
                 type: cosmetic.type,
+                variants: cosmetic.variants?.map((variant: any) => ({
+                    id: variant.id,
+                    name: variant.variant_name,
+                    assetId: variant.asset_id,
+                    coverAssetId: variant.cover_asset_id,
+                })),
             })),
             total: json.pagination.total_items,
             pages: json.pagination.total_pages,
@@ -127,5 +139,24 @@ export async function usernameToUUID(username: string): Promise<string | null> {
         return json.data.player.id;
     } else {
         return null;
+    }
+}
+
+export async function UUIDToSkinURL(uuid: string): Promise<{skin: string, type: "slim" | "wide"}> {
+    const mojangReq = await polyFetch(`https://mowojang.seraph.si/session/minecraft/profile/${uuid}`);
+
+    if (mojangReq.res?.ok && mojangReq.json) {
+        let mojangProperties = mojangReq.json.properties as { name: string, value: string }[]
+        let textureProperty = JSON.parse(Buffer.from(mojangProperties.find(prop => prop.name === "textures")?.value ?? '{}', 'base64').toString('utf-8'))
+
+        return {
+            skin: textureProperty?.textures?.SKIN?.url ?? "https://textures.minecraft.net/texture/90b8789136facaa9f87b765140e1c8135e6652f513481bd84e6bd8c44844d7ce",
+            type: textureProperty?.textures?.SKIN?.metadata?.model === "slim" ? "slim" : "wide"
+        }
+    } else {
+        return {
+            skin: "https://textures.minecraft.net/texture/90b8789136facaa9f87b765140e1c8135e6652f513481bd84e6bd8c44844d7ce",
+            type: "wide"
+        };
     }
 }

@@ -1,3 +1,3 @@
-# PolyPlus Backend
+# PolyPlus Website
 
 This repo contains the code for the [PolyPlus](https://github.com/Polyfrost/PolyPlus) frontend.

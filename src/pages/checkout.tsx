@@ -5,6 +5,7 @@ import User from "@/components/icons/User";
 import ItemCard from "@/components/ItemCard";
 import ItemCarousel from "@/components/ItemCarousel";
 import ItemListCard from "@/components/ItemListCard";
+import LoadingItemCard from "@/components/LoadingItemCard";
 import PageNav from "@/components/PageNav";
 import TextInput from "@/components/TextInput";
 import { useCart } from "@/context/CartContext";
@@ -95,6 +96,9 @@ export default function Checkout() {
                             {cart?.items!.map((item) => (
                                 <ItemListCard key={item.id} name={item.name} description={item.description} id={item.id} coverId={item.coverAssetId} price={item.price} discount={item.discount} />
                             ))}
+                            {cart?.items!.length === 0 && (
+                                <p className="text-center">No Items {`:(`}</p>
+                            )}
                         </div>
                         <div className="flex flex-col gap-5 min-[900px]:w-1/3 w-full">
                             <div className="flex flex-col gap-3">
@@ -130,7 +134,7 @@ export default function Checkout() {
                                 color="blue"
                                 className="w-full"
                                 onClick={handleStripeCheckout}
-                                disabled={!acceptedTerms || !uuid}
+                                disabled={!acceptedTerms || !uuid || (cart?.items!.length === 0)}
                             />
                             {/* <div className="flex flex-col gap-3">
                                 <h2 className="text-sm">
@@ -149,7 +153,7 @@ export default function Checkout() {
                                 id="terms"
                                 customLabel={
                                     <label htmlFor={`checkbox-terms`} className="text-white light:text-black text-sm pl-2 leading-4.5 cursor-pointer select-none">
-                                        I have read and agree to the <span className="text-blue">OneClient Sale Terms and Conditions</span>
+                                        I've read & agree to the <a className="text-blue" href="https://polyfrost.org/legal/terms" target="_blank">OneClient Terms of Service</a>
                                     </label>
                                 }
                                 checked={acceptedTerms}
@@ -162,9 +166,19 @@ export default function Checkout() {
             <section className="relative overflow-hidden">
                 <div className="max-w-273 mx-auto flex flex-col justify-center items-center min-[1130px]:px-0 px-4 pt-10 pb-15">
                     <ItemCarousel title="Discover More Cosmetics" stepSize={228}>
-                        {editorsPick.map((cosmetic) => (
-                            <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
-                        ))}
+                        {editorsPick.length > 0 ? (
+                            <>
+                                {editorsPick.map((cosmetic) => (
+                                    <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
+                                ))}
+                            </>
+                        ) : (
+                            <>
+                                {Array.from({ length: 10 }).map((_, index) => (
+                                    <LoadingItemCard key={index} />
+                                ))}
+                            </>
+                        )}
                     </ItemCarousel>
                 </div>
             </section>

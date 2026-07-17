@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import CollectionCard from "@/components/CollectionCard";
 import { Collection } from "@/types/Collection";
+import LoadingCollectionCard from "./LoadingCollectionCard";
 
 export default function CollectionCarousel({ collections }: { collections: Collection[] }) {
     const [currentIndex, setCurrentIndex] = useState(2);
@@ -52,29 +53,12 @@ export default function CollectionCarousel({ collections }: { collections: Colle
 
         return () => clearTimeout(timeout);
     }, [currentIndex, count]);
-
-    if (count <= 1) {
-        return (
-            <div className="relative w-full h-100 flex justify-center">
-                <div className="flex absolute w-full justify-center">
-                    <CollectionCard
-                        focused
-                        size="large"
-                        title={collections[0]?.name ?? ""}
-                        description={collections[0]?.description}
-                        id={collections[0]?.id ?? 0}
-                        assetId={collections[0]?.assetId ?? 0}
-                    />
-                </div>
-            </div>
-        );
-    }
-
-    const slides = [collections[count - 2], collections[count - 1], ...collections, collections[0], collections[1]];
+    
+    const slides = collections.length > 0 ? [collections[count - 2], collections[count - 1], ...collections, collections[0], collections[1]] : [];
 
     return (
         <div className="relative w-full h-100 flex justify-center">
-            {slides.map((collection, index) => (
+            {slides.length > 0 ? (slides.map((collection, index) => (
                 <div
                     onClick={() => {
                         if (index === currentIndex + 1) {
@@ -97,7 +81,17 @@ export default function CollectionCarousel({ collections }: { collections: Colle
                         assetId={collection?.assetId ?? 0}
                     />
                 </div>
-            ))}
+            ))) : (
+                Array.from({ length: 5 }).map((_, index) => (
+                    <div
+                        key={index}
+                        style={{ transform: `translateX(${(index - currentIndex) * 75.5}rem)` }}
+                        className={`flex absolute w-full justify-center ${index === currentIndex ? "scale-100" : "scale-90"} ${isResetting ? "transition-none" : "transition-all"} duration-500`}
+                    >
+                        <LoadingCollectionCard size="large" />
+                    </div>
+                ))
+            )}
         </div>
     );
 }
