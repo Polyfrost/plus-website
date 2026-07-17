@@ -120,7 +120,7 @@ export default function Navbar({ atTop }: { atTop: boolean }) {
                             <NavbarTypeButton atTop={atTop} extended={extended} image="/gloves.png" name="Gloves" nav="/type/glove" />
                             <NavbarTypeButton atTop={atTop} extended={extended} image="/hats.png" name="Hats" nav="/type/hat" />
                             <NavbarTypeButton atTop={atTop} extended={extended} image="/boots.png" name="Boots" nav="/type/boots" />
-                            <NavbarTypeButton atTop={atTop} extended={extended} image="/backpacks.png" name="Backpacks" nav="/type/backpack" />
+                            <NavbarTypeButton atTop={atTop} extended={extended} image="/backpacks.png" name="Backs" nav="/type/backpack" />
                             <NavbarTypeButton atTop={atTop} extended={extended} image="/shoulders.png" name="Shoulders" nav="/type/shoulder" />
                             <NavbarTypeButton atTop={atTop} extended={extended} image="/auras.png" name="Auras" nav="/type/aura" />
                         </div>
