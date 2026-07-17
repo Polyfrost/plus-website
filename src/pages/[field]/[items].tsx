@@ -45,7 +45,6 @@ export default function Items() {
 
     const handleCosmeticSearch = async (page: number) => {
         setPaginating(true);
-        setLoading(true);
         switch (arg1) {
             case "type":
                 const typeData = await searchCosmetics({ tags: [...selectedTags, ...selectedColors].join(","), types: arg2, nb: 12, page });
@@ -80,7 +79,7 @@ export default function Items() {
         if (router.isReady) {
             handleCosmeticSearch(1);
         }
-    }, [arg1, arg2, selectedTags, selectedColors, selectedTypes]);
+    }, [arg1, arg2, selectedTags, selectedColors, selectedTypes, router.isReady]);
 
     useEffect(() => {
         if (inView && currentPage < pages && !paginating) {

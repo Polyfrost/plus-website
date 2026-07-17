@@ -14,7 +14,7 @@ import LoadingItemCard from "@/components/LoadingItemCard";
 export default function Search() {
     const router = useRouter();
     const text = (router.query.text as string) || "";
-    const sort = (router.query.sort as string) || "ascending";
+    const sort = (router.query.sort as string) || "newest";
 
     const validTypes = ["cape", "emote", "wings", "glove", "hat", "boots", "backpack", "glasses", "shoulder", "aura"];
 
@@ -36,15 +36,8 @@ export default function Search() {
         threshold: 1,
     });
 
-    useEffect(() => {
-        if (router.isReady && text === "") {
-            router.push("/");
-        }
-    }, [text, router]);
-
     const handleCosmeticSearch = async (page: number) => {
         setPaginating(true);
-        setLoading(true);
         const cosmeticData = await searchCosmetics({ text: text, sort: sort, tags: [...selectedTags, ...selectedColors].join(","), types: selectedTypes.join(","), nb: 12, page });
         setItems((prev) => (page === 1 ? cosmeticData.items : [...prev, ...cosmeticData.items]));
         setPages(cosmeticData.pages);
@@ -58,7 +51,7 @@ export default function Search() {
         if (router.isReady) {
             handleCosmeticSearch(1);
         }
-    }, [text, sort, selectedTags, selectedColors, selectedTypes]);
+    }, [text, sort, selectedTags, selectedColors, selectedTypes, router.isReady]);
 
     useEffect(() => {
         if (inView && currentPage < pages && !paginating) {
