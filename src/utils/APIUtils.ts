@@ -133,6 +133,16 @@ export async function createStripe(uuid: string, prices: string[]): Promise<{ ur
     }
 }
 
+export async function getAssetUrl(id: number): Promise<string | null> {
+    const { res, json } = await polyFetch(`${process.env.BACKEND_URL}/asset/${id}/url`);
+    if (res?.ok && json?.url) {
+        return json.url;
+    } else {
+        console.error(`Failed to resolve asset url for ${id}`);
+        return null;
+    }
+}
+
 export async function usernameToUUID(username: string): Promise<string | null> {
     const { res, json } = await polyFetch(`https://playerdb.co/api/player/minecraft/${username}`);
     if (res?.ok && json) {
