@@ -102,7 +102,7 @@ export default function Checkout() {
                             <div className="flex flex-col gap-3">
                                 <div className="flex flex-row justify-between items-center">
                                     <h2 className="text-sm">Minecraft Username</h2>
-                                    {uuid && <img className="h-5 w-5" src={`https://nmsr.nickac.dev/face/${uuid}`} />}
+                                    {uuid && <img className="h-5 w-5" src={`https://nmsr.nickac.dev/face/${uuid}`} alt={`Minecraft face for ${username}`} />}
                                 </div>
                                 <TextInput
                                     icon={<User className="w-4 h-4 text-white/50 light:text-black/50" />}
