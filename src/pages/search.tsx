@@ -150,7 +150,15 @@ export default function Search() {
                                 {!loading ? (
                                     <>
                                         {items.map((cosmetic) => (
-                                            <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
+                                            <ItemCard
+                                                key={cosmetic.id}
+                                                name={cosmetic.name}
+                                                id={cosmetic.id}
+                                                coverId={cosmetic.coverAssetId}
+                                                price={cosmetic.price}
+                                                discount={cosmetic.discount}
+                                                newItem={isNewItem(cosmetic.createdAt)}
+                                            />
                                         ))}
                                     </>
                                 ) : (

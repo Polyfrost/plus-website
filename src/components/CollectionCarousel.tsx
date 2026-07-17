@@ -53,45 +53,45 @@ export default function CollectionCarousel({ collections }: { collections: Colle
 
         return () => clearTimeout(timeout);
     }, [currentIndex, count]);
-    
+
     const slides = collections.length > 0 ? [collections[count - 2], collections[count - 1], ...collections, collections[0], collections[1]] : [];
 
     return (
         <div className="relative w-full h-100 flex justify-center">
-            {slides.length > 0 ? (slides.map((collection, index) => (
-                <div
-                    onClick={() => {
-                        if (index === currentIndex + 1) {
-                            move("forward");
-                        } else if (index === currentIndex - 1) {
-                            move("backward");
-                        }
-                    }}
-                    key={index}
-                    style={{ transform: `translateX(${(index - currentIndex) * 75.5}rem)` }}
-                    className={`flex absolute w-full justify-center ${index === currentIndex ? "scale-100" : "scale-90"} ${isResetting ? "transition-none" : "transition-all"} duration-500`}
-                >
-                    <CollectionCard
-                        transition={isResetting ? false : true}
-                        focused={index === currentIndex}
-                        size="large"
-                        title={collection?.name ?? ""}
-                        description={collection?.description}
-                        id={collection?.id ?? 0}
-                        assetId={collection?.assetId ?? 0}
-                    />
-                </div>
-            ))) : (
-                Array.from({ length: 5 }).map((_, index) => (
-                    <div
-                        key={index}
-                        style={{ transform: `translateX(${(index - currentIndex) * 75.5}rem)` }}
-                        className={`flex absolute w-full justify-center ${index === currentIndex ? "scale-100" : "scale-90"} ${isResetting ? "transition-none" : "transition-all"} duration-500`}
-                    >
-                        <LoadingCollectionCard size="large" />
-                    </div>
-                ))
-            )}
+            {slides.length > 0
+                ? slides.map((collection, index) => (
+                      <div
+                          onClick={() => {
+                              if (index === currentIndex + 1) {
+                                  move("forward");
+                              } else if (index === currentIndex - 1) {
+                                  move("backward");
+                              }
+                          }}
+                          key={index}
+                          style={{ transform: `translateX(${(index - currentIndex) * 75.5}rem)` }}
+                          className={`flex absolute w-full justify-center ${index === currentIndex ? "scale-100" : "scale-90"} ${isResetting ? "transition-none" : "transition-all"} duration-500`}
+                      >
+                          <CollectionCard
+                              transition={isResetting ? false : true}
+                              focused={index === currentIndex}
+                              size="large"
+                              title={collection?.name ?? ""}
+                              description={collection?.description}
+                              id={collection?.id ?? 0}
+                              assetId={collection?.assetId ?? 0}
+                          />
+                      </div>
+                  ))
+                : Array.from({ length: 5 }).map((_, index) => (
+                      <div
+                          key={index}
+                          style={{ transform: `translateX(${(index - currentIndex) * 75.5}rem)` }}
+                          className={`flex absolute w-full justify-center ${index === currentIndex ? "scale-100" : "scale-90"} ${isResetting ? "transition-none" : "transition-all"} duration-500`}
+                      >
+                          <LoadingCollectionCard size="large" />
+                      </div>
+                  ))}
         </div>
     );
 }

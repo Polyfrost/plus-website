@@ -3,7 +3,6 @@ import { useState } from "react";
 import Button from "./Button";
 import Burger from "./icons/Burger";
 import Cart from "./icons/Cart";
-import Login from "./icons/Login";
 import Night from "./icons/Night";
 import Search from "./icons/Search";
 import Logo from "./Logo";

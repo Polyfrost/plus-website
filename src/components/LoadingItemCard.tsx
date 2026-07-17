@@ -7,7 +7,7 @@ export default function LoadingItemCard() {
         >
             <button className="flex flex-col w-full">
                 <div className="flex flex-col gap-1.5 px-4 pt-4 pb-2.5">
-                    <div className="h-40 w-full bg-neutral-300/10 animate-pulse rounded-lg border border-white/10 light:border-white/90"/>
+                    <div className="h-40 w-full bg-neutral-300/10 animate-pulse rounded-lg border border-white/10 light:border-white/90" />
                     <div className="flex flex-col gap-2 my-2 text-start">
                         <div className={`h-3 w-22 bg-white/30 animate-pulse rounded-md`} />
                         <div className="flex flex-row gap-1">

@@ -96,9 +96,7 @@ export default function Checkout() {
                             {cart?.items!.map((item) => (
                                 <ItemListCard key={item.id} name={item.name} description={item.description} id={item.id} coverId={item.coverAssetId} price={item.price} discount={item.discount} />
                             ))}
-                            {cart?.items!.length === 0 && (
-                                <p className="text-center">No Items {`:(`}</p>
-                            )}
+                            {cart?.items!.length === 0 && <p className="text-center">No Items {`:(`}</p>}
                         </div>
                         <div className="flex flex-col gap-5 min-[900px]:w-1/3 w-full">
                             <div className="flex flex-col gap-3">
@@ -134,7 +132,7 @@ export default function Checkout() {
                                 color="blue"
                                 className="w-full"
                                 onClick={handleStripeCheckout}
-                                disabled={!acceptedTerms || !uuid || (cart?.items!.length === 0)}
+                                disabled={!acceptedTerms || !uuid || cart?.items!.length === 0}
                             />
                             {/* <div className="flex flex-col gap-3">
                                 <h2 className="text-sm">
@@ -153,7 +151,10 @@ export default function Checkout() {
                                 id="terms"
                                 customLabel={
                                     <label htmlFor={`checkbox-terms`} className="text-white light:text-black text-sm pl-2 leading-4.5 cursor-pointer select-none">
-                                        I've read & agree to the <a className="text-blue" href="https://polyfrost.org/legal/terms" target="_blank">OneClient Terms of Service</a>
+                                        I&apos;ve read & agree to the{" "}
+                                        <a className="text-blue" href="https://polyfrost.org/legal/terms" target="_blank">
+                                            OneClient Terms of Service
+                                        </a>
                                     </label>
                                 }
                                 checked={acceptedTerms}
@@ -169,7 +170,15 @@ export default function Checkout() {
                         {editorsPick.length > 0 ? (
                             <>
                                 {editorsPick.map((cosmetic) => (
-                                    <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
+                                    <ItemCard
+                                        key={cosmetic.id}
+                                        name={cosmetic.name}
+                                        id={cosmetic.id}
+                                        coverId={cosmetic.coverAssetId}
+                                        price={cosmetic.price}
+                                        discount={cosmetic.discount}
+                                        newItem={isNewItem(cosmetic.createdAt)}
+                                    />
                                 ))}
                             </>
                         ) : (

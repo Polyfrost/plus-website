@@ -16,23 +16,53 @@ export default function Footer() {
                     <div className="flex min-[800px]:flex-row flex-col items-start gap-x-14 gap-y-6">
                         <div className="flex flex-col gap-2">
                             <h1 className="font-medium pb-1">Polyfrost</h1>
-                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://polyfrost.org" target="_blank">Main Website</a>
-                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://polyfrost.org/about" target="_blank">About Us</a>
-                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://polyfrost.org/branding" target="_blank">Branding</a>
-                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://docs.polyfrost.org" target="_blank">Documentation</a>
-                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://polyfrost.org/oss" target="_blank">Open Source</a>
+                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://polyfrost.org" target="_blank">
+                                Main Website
+                            </a>
+                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://polyfrost.org/about" target="_blank">
+                                About Us
+                            </a>
+                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://polyfrost.org/branding" target="_blank">
+                                Branding
+                            </a>
+                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://docs.polyfrost.org" target="_blank">
+                                Documentation
+                            </a>
+                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://polyfrost.org/oss" target="_blank">
+                                Open Source
+                            </a>
                         </div>
                         <div className="flex flex-col gap-2">
                             <h1 className="font-medium pb-1">Legal</h1>
-                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://polyfrost.org/legal/terms" target="_blank">Terms of Service</a>
-                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://polyfrost.org/legal/privacy" target="_blank">Privacy Policy</a>
+                            <a
+                                className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300"
+                                href="https://polyfrost.org/legal/terms"
+                                target="_blank"
+                            >
+                                Terms of Service
+                            </a>
+                            <a
+                                className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300"
+                                href="https://polyfrost.org/legal/privacy"
+                                target="_blank"
+                            >
+                                Privacy Policy
+                            </a>
                         </div>
                         <div className="flex flex-col gap-2">
                             <h1 className="font-medium pb-1">Social</h1>
-                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://polyfrost.org/discord" target="_blank">Discord</a>
-                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://youtube.com/@Polyfrost" target="_blank">Youtube</a>
-                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://github.com/Polyfrost" target="_blank">GitHub</a>
-                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://polyfrost.org/contact" target="_blank">Contact Us</a>
+                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://polyfrost.org/discord" target="_blank">
+                                Discord
+                            </a>
+                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://youtube.com/@Polyfrost" target="_blank">
+                                Youtube
+                            </a>
+                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://github.com/Polyfrost" target="_blank">
+                                GitHub
+                            </a>
+                            <a className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300" href="https://polyfrost.org/contact" target="_blank">
+                                Contact Us
+                            </a>
                         </div>
                     </div>
                 </div>

@@ -24,7 +24,9 @@ body {
     background: #11171c;
     color: white;
     font-family: "Poppins", sans-serif;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
 }
 
 html.light body {

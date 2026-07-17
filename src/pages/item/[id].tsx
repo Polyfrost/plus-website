@@ -4,7 +4,6 @@ import Cart from "@/components/icons/Cart";
 import ItemCard from "@/components/ItemCard";
 import ItemCarousel from "@/components/ItemCarousel";
 import PageNav from "@/components/PageNav";
-import QuestionBox from "@/components/QuestionBox";
 import Tag from "@/components/Tag";
 import { getCosmeticById, usernameToUUID, UUIDToSkinURL } from "@/utils/APIUtils";
 import { useRouter } from "next/router";
@@ -32,8 +31,6 @@ export default function Id() {
     const [cosmetic, setCosmetic] = useState<Item>();
     const [selectedVariant, setSelectedVariant] = useState<number>(0);
     const [similarCosmetics, setSimilarCosmetics] = useState<Item[]>([]);
-
-    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
     useEffect(() => {
         async function fetchCosmetic() {
@@ -180,10 +177,14 @@ export default function Id() {
                                             <button
                                                 className={`${selectedVariant === index ? "bg-blue border-blue-400/30" : "bg-primary/50 light:bg-primary-light/50 border-white/30 light:border-white/80"} duration-300 relative p-2 rounded-md shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] select-none`}
                                                 onClick={() => setSelectedVariant(index)}
+                                                key={variant.id}
                                             >
                                                 <div className="flex flex-col gap-1 justify-center items-center">
                                                     <div className="h-14.5 w-fit bg-neutral-300/10 rounded-lg shrink-0">
-                                                        <img className="rounded-[5px] h-14.5 w-14.5 border border-white/10 light:border-white/90 object-cover" src={`${process.env.BACKEND_URL}/asset/${variant.coverAssetId}`} />
+                                                        <img
+                                                            className="rounded-[5px] h-14.5 w-14.5 border border-white/10 light:border-white/90 object-cover"
+                                                            src={`${process.env.BACKEND_URL}/asset/${variant.coverAssetId}`}
+                                                        />
                                                     </div>
                                                     <p className="text-text light:text-black text-sm leading-6 whitespace-nowrap truncate">{variant.name || "Default"}</p>
                                                 </div>
@@ -196,31 +197,21 @@ export default function Id() {
                         <div className="flex flex-col gap-3 min-[1130px]:w-3/7 w-full">
                             <div className="flex flex-row gap-2 items-center">
                                 {cosmetic?.tags && cosmetic?.tags.length > 0 ? (
-                                    cosmetic?.tags.map((tag) => (
-                                        <Tag key={tag} label={tag.charAt(0).toUpperCase() + tag.slice(1)} />
-                                    ))
+                                    cosmetic?.tags.map((tag) => <Tag key={tag} label={tag.charAt(0).toUpperCase() + tag.slice(1)} />)
                                 ) : (
                                     <div className="h-5 w-30 bg-white/30 animate-pulse rounded-md" />
                                 )}
                             </div>
-                            {cosmetic ? (
-                                <h1 className="text-3xl text-white/75 light:text-black/75">{cosmetic.name}</h1>
-                            ) : (
-                                <div className="h-10.5 w-80 bg-white/30 animate-pulse rounded-md" />
-                            )}
-                            {cosmetic ? (
-                                <p className="text-text light:text-black text-sm leading-6">{cosmetic.description}</p>
-                            ) : (
-                                <div className="h-4 w-60 bg-white/30 animate-pulse rounded-md" />
-                            )}
+                            {cosmetic ? <h1 className="text-3xl text-white/75 light:text-black/75">{cosmetic.name}</h1> : <div className="h-10.5 w-80 bg-white/30 animate-pulse rounded-md" />}
+                            {cosmetic ? <p className="text-text light:text-black text-sm leading-6">{cosmetic.description}</p> : <div className="h-4 w-60 bg-white/30 animate-pulse rounded-md" />}
                             {cosmetic ? (
                                 <div className="flex flex-row gap-2 items-end">
-                                {cosmetic && cosmetic.discount && <p className="text-red text-md leading-6 line-through">${cosmetic.price.toFixed(2)}</p>}
-                                <p className={`${cosmetic && cosmetic.discount ? "text-green" : ""} text-[32px] leading-10`}>
-                                    ${(cosmetic ? cosmetic.price * (1 - (cosmetic.discount || 0) / 100) : 0).toFixed(2)}
-                                </p>
-                            </div>
-                            ): (
+                                    {cosmetic && cosmetic.discount && <p className="text-red text-md leading-6 line-through">${cosmetic.price.toFixed(2)}</p>}
+                                    <p className={`${cosmetic && cosmetic.discount ? "text-green" : ""} text-[32px] leading-10`}>
+                                        ${(cosmetic ? cosmetic.price * (1 - (cosmetic.discount || 0) / 100) : 0).toFixed(2)}
+                                    </p>
+                                </div>
+                            ) : (
                                 <div className="h-11.5 w-40 bg-white/30 animate-pulse rounded-md" />
                             )}
                             <div className="flex flex-row gap-4 items-center">
@@ -257,7 +248,15 @@ export default function Id() {
                         {similarCosmetics.length > 0 ? (
                             <>
                                 {similarCosmetics.map((cosmetic) => (
-                                    <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
+                                    <ItemCard
+                                        key={cosmetic.id}
+                                        name={cosmetic.name}
+                                        id={cosmetic.id}
+                                        coverId={cosmetic.coverAssetId}
+                                        price={cosmetic.price}
+                                        discount={cosmetic.discount}
+                                        newItem={isNewItem(cosmetic.createdAt)}
+                                    />
                                 ))}
                             </>
                         ) : (

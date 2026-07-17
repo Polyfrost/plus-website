@@ -25,7 +25,6 @@ export default function Home() {
         fetchCollections();
     }, []);
 
-    
     useEffect(() => {
         async function fetchEditorsPick() {
             const cosmeticsData = await searchCosmetics({ tags: "editor" });
@@ -79,7 +78,15 @@ export default function Home() {
                             {editorsPick.length > 0 ? (
                                 <>
                                     {editorsPick.map((cosmetic) => (
-                                        <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
+                                        <ItemCard
+                                            key={cosmetic.id}
+                                            name={cosmetic.name}
+                                            id={cosmetic.id}
+                                            coverId={cosmetic.coverAssetId}
+                                            price={cosmetic.price}
+                                            discount={cosmetic.discount}
+                                            newItem={isNewItem(cosmetic.createdAt)}
+                                        />
                                     ))}
                                 </>
                             ) : (
@@ -94,7 +101,15 @@ export default function Home() {
                             {newest.length > 0 ? (
                                 <>
                                     {newest.map((cosmetic) => (
-                                        <ItemCard key={cosmetic.id} name={cosmetic.name} id={cosmetic.id} coverId={cosmetic.coverAssetId} price={cosmetic.price} discount={cosmetic.discount} newItem={isNewItem(cosmetic.createdAt)} />
+                                        <ItemCard
+                                            key={cosmetic.id}
+                                            name={cosmetic.name}
+                                            id={cosmetic.id}
+                                            coverId={cosmetic.coverAssetId}
+                                            price={cosmetic.price}
+                                            discount={cosmetic.discount}
+                                            newItem={isNewItem(cosmetic.createdAt)}
+                                        />
                                     ))}
                                 </>
                             ) : (
