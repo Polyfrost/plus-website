@@ -5,7 +5,7 @@ import ItemCard from "@/components/ItemCard";
 import ItemCarousel from "@/components/ItemCarousel";
 import PageNav from "@/components/PageNav";
 import Tag from "@/components/Tag";
-import { getAssetUrl, getCosmeticById, usernameToUUID, UUIDToSkinURL } from "@/utils/APIUtils";
+import { getCosmeticById, usernameToUUID, UUIDToSkinURL } from "@/utils/APIUtils";
 import { useRouter } from "next/router";
 import { isNewItem } from "@/utils/TimeUtils";
 import { useEffect, useRef, useState } from "react";
@@ -118,20 +118,11 @@ export default function Id() {
 
         const assetURL = `${process.env.BACKEND_URL}/asset/${cosmetic.variants?.[selectedVariant]?.assetId ?? cosmetic.assetId}`;
 
-        let cancelled = false;
-        // Resolve the presigned url first, then let skinview3d fetch the asset
-        // directly. Fetching the redirect endpoint from JS would follow a
-        // cross-origin redirect to object storage and fail CORS.
-        (async () => {
-            const url = await getAssetUrl(cosmetic.assetId);
-            if (cancelled || !url) return;
-
-            if (cosmetic.type === "cape") {
-                skinViewer.loadCape(url);
-            } else {
-                loadCosmeticFromZip(skinViewer, url, { type: cosmetic.type as any });
-            }
-        })();
+        if (cosmetic.type === "cape") {
+            skinViewer.loadCape(assetURL);
+        } else {
+            loadCosmeticFromZip(skinViewer, assetURL, { type: cosmetic.type as any });
+        }
 
         const observer = new ResizeObserver(([entry]) => {
             const { width, height } = entry.contentRect;
@@ -140,7 +131,6 @@ export default function Id() {
         observer.observe(box);
 
         return () => {
-            cancelled = true;
             observer.disconnect();
             skinViewer.dispose();
         };
