@@ -184,6 +184,7 @@ export default function Id() {
                                                         <img
                                                             className="rounded-[5px] h-14.5 w-14.5 border border-white/10 light:border-white/90 object-cover"
                                                             src={`${process.env.BACKEND_URL}/asset/${variant.coverAssetId}`}
+                                                            alt={`Cover image for ${cosmetic.name} variant ${variant.name || "Default"}`}
                                                         />
                                                     </div>
                                                     <p className={`${selectedVariant === index ? "text-text" : "text-text light:text-black"} text-sm leading-6 whitespace-nowrap duration-300`}>{variant.name || "Default"}</p>

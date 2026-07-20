@@ -57,7 +57,7 @@ export default function CollectionCarousel({ collections }: { collections: Colle
     const slides = collections.length > 0 ? [collections[count - 2], collections[count - 1], ...collections, collections[0], collections[1]] : [];
 
     return (
-        <div className="relative w-full aspect-[3/1] flex justify-center">
+        <div className="relative w-full h-100 flex justify-center">
             {slides.length > 0
                 ? slides.map((collection, index) => (
                       <div
