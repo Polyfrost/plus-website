@@ -3,15 +3,34 @@ import ItemCard from "@/components/ItemCard";
 import PageNav from "@/components/PageNav";
 import Tag from "@/components/Tag";
 import { Item } from "@/types/Item";
-import { getTags, searchCosmetics } from "@/utils/APIUtils";
+import { getTags, searchCosmetics, toSerializable } from "@/utils/APIUtils";
 import type { ItemTag } from "@/types/ItemTag";
 import { useRouter } from "next/router";
 import { isNewItem } from "@/utils/TimeUtils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import LoadingItemCard from "@/components/LoadingItemCard";
+import type { GetServerSideProps } from "next";
 
-export default function Items() {
+type ItemsProps = {
+    tags: ItemTag[];
+    initialItems: Item[];
+    initialPages: number;
+    initialTotal: number;
+};
+
+export const getServerSideProps: GetServerSideProps<ItemsProps> = async ({ params }) => {
+    const arg1 = params?.field as string;
+    const arg2 = params?.items as string;
+
+    const query: { [key: string]: string | number | boolean } =
+        arg1 === "type" ? { types: arg2, nb: 12, page: 1 } : arg1 === "collection" ? { collection: arg2, nb: 12, page: 1 } : { tags: arg2, nb: 12, page: 1 };
+
+    const [tags, data] = await Promise.all([getTags(), searchCosmetics(query).catch(() => ({ items: [], total: 0, pages: 1 }))]);
+
+    return { props: toSerializable({ tags, initialItems: data.items, initialPages: data.pages, initialTotal: data.total }) };
+};
+
+export default function Items({ tags, initialItems, initialPages, initialTotal }: ItemsProps) {
     const router = useRouter();
     const arg1 = router.query.field as string;
     const arg2 = router.query.items as string;
@@ -19,19 +38,18 @@ export default function Items() {
     const validArg1s = ["type", "category", "collection"];
     const validTypes = ["cape", "emote", "wings", "glove", "hat", "boots", "backpack", "glasses", "shoulder", "aura"];
 
-    const [items, setItems] = useState<Item[]>([]);
-    const [pages, setPages] = useState<number>(1);
+    const [items, setItems] = useState<Item[]>(initialItems);
+    const [pages, setPages] = useState<number>(initialPages);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [totalItems, setTotalItems] = useState<number>(0);
-    const [loading, setLoading] = useState<boolean>(true);
-
-    const [tags, setTags] = useState<ItemTag[]>([]);
+    const [totalItems, setTotalItems] = useState<number>(initialTotal);
 
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [selectedColors, setSelectedColors] = useState<string[]>([]);
     const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
 
     const [paginating, setPaginating] = useState<boolean>(false);
+
+    const mountedRef = useRef(false);
 
     const { ref, inView } = useInView({
         threshold: 1,
@@ -72,14 +90,16 @@ export default function Items() {
                 break;
         }
         setPaginating(false);
-        setLoading(false);
     };
 
     useEffect(() => {
-        if (router.isReady) {
-            handleCosmeticSearch(1);
+        if (!mountedRef.current) {
+            mountedRef.current = true;
+            return;
         }
-    }, [arg1, arg2, selectedTags, selectedColors, selectedTypes, router.isReady]);
+        
+        handleCosmeticSearch(1);
+    }, [arg1, arg2, selectedTags, selectedColors, selectedTypes]);
 
     useEffect(() => {
         if (inView && currentPage < pages && !paginating) {
@@ -87,15 +107,6 @@ export default function Items() {
             setCurrentPage((prev) => prev + 1);
         }
     }, [inView, currentPage, pages]);
-
-    useEffect(() => {
-        async function fetchTags() {
-            const tagsData = await getTags();
-            setTags(tagsData);
-        }
-
-        fetchTags();
-    }, []);
 
     return (
         <>
@@ -124,7 +135,7 @@ export default function Items() {
             <section className="relative overflow-hidden">
                 <div className="max-w-273 mx-auto flex flex-col justify-center items-center pt-2 pb-15 min-[1130px]:px-0 px-4">
                     <div className="flex min-[1130px]:flex-row flex-col w-full gap-12">
-                        <div className="min-[1130px]:w-45 w-full shrink-0 h-fit py-2.5 px-4 bg-primary/35 light:bg-primary-light/35 border border-white/30 light:border-white/80 rounded-xl shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)]">
+                        <div className="min-[1130px]:w-45 w-full shrink-0 h-fit py-2.5 px-4 bg-primary/35 light:bg-primary-light/35 border border-white/10 light:border-white/15 rounded-xl shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] light:shadow-[0px_6px_15px_0px_rgba(0,0,0,0.10)]">
                             <div className="flex min-[1130px]:flex-col min-[430px]:flex-row flex-col min-[1130px]:gap-4 min-[430px]:gap-16 gap-4">
                                 {arg1 !== "type" && (
                                     <div className="flex flex-col gap-2">
@@ -186,28 +197,19 @@ export default function Items() {
                             </div>
                         </div>
                         <div className="flex flex-col">
-                            <div className="flex flex-row flex-wrap min-[1130px]:gap-x-12 min-[1130px]:justify-start justify-center gap-x-4 gap-y-8">
-                                {!loading ? (
-                                    <>
-                                        {items.map((cosmetic) => (
-                                            <ItemCard
-                                                key={cosmetic.id}
-                                                name={cosmetic.name}
-                                                id={cosmetic.id}
-                                                coverId={cosmetic.coverAssetId}
-                                                price={cosmetic.price}
-                                                discount={cosmetic.discount}
-                                                newItem={isNewItem(cosmetic.createdAt)}
-                                            />
-                                        ))}
-                                    </>
-                                ) : (
-                                    <>
-                                        {Array.from({ length: 8 }).map((_, index) => (
-                                            <LoadingItemCard key={index} />
-                                        ))}
-                                    </>
-                                )}
+                            <div className="grid min-[890px]:grid-cols-4 min-[665px]:grid-cols-3 grid-cols-2 mx-auto w-full min-[1130px]:gap-x-12 min-[430px]:gap-x-8 gap-x-4 min-[1130px]:justify-start justify-center gap-y-8">
+                                {items.map((cosmetic) => (
+                                    <ItemCard
+                                        key={cosmetic.id}
+                                        name={cosmetic.name}
+                                        id={cosmetic.id}
+                                        coverId={cosmetic.coverAssetId}
+                                        price={cosmetic.price}
+                                        discount={cosmetic.discount}
+                                        newItem={isNewItem(cosmetic.createdAt)}
+                                        width="w-full min-[430px]:min-w-45"
+                                    />
+                                ))}
                             </div>
                             {items.length > 0 && currentPage < pages && !paginating && <div ref={ref} className="flex h-0.5 w-full" />}
                         </div>

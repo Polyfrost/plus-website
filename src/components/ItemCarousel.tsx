@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
-import LeftArrow from "./icons/LeftArrow";
-import RightArrow from "./icons/RightArrow";
+import LeftArrowIcon from "./icons/LeftArrow";
+import RightArrowIcon from "./icons/RightArrow";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function ItemCarousel({ children, title, stepSize, viewAll }: { children: React.ReactNode; title: string; stepSize: number; viewAll?: string }) {
@@ -48,10 +48,10 @@ export default function ItemCarousel({ children, title, stepSize, viewAll }: { c
                     )}
                     <div className="flex flex-row gap-2">
                         <button className="flex items-center justify-center" onClick={() => move("backward")} disabled={!canScrollBackward}>
-                            <LeftArrow className={`h-4.5 ${canScrollBackward ? "text-text/75 light:text-black/75" : "text-text/30 light:text-black/30"}`} />
+                            <LeftArrowIcon className={`h-4.5 ${canScrollBackward ? "text-white/75 light:text-black/75" : "text-white/30 light:text-black/30"}`} />
                         </button>
                         <button className="flex items-center justify-center" onClick={() => move("forward")} disabled={!canScrollForward}>
-                            <RightArrow className={`h-4.5 ${canScrollForward ? "text-text/75 light:text-black/75" : "text-text/30 light:text-black/30"}`} />
+                            <RightArrowIcon className={`h-4.5 ${canScrollForward ? "text-white/75 light:text-black/75" : "text-white/30 light:text-black/30"}`} />
                         </button>
                     </div>
                 </div>

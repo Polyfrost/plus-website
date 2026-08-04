@@ -13,6 +13,7 @@ export type Item = {
     variants: {
         id: number;
         name: string;
+        model?: string;
         assetId: number;
         coverAssetId: number;
     }[];

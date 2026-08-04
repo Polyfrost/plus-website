@@ -1,4 +1,4 @@
-export default function Bag({ className }: { className?: string }) {
+export default function BagIcon({ className }: { className?: string }) {
     return (
         <svg className={className} viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path

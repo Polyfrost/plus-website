@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import CollectionCard from "@/components/CollectionCard";
 import { Collection } from "@/types/Collection";
-import LoadingCollectionCard from "./LoadingCollectionCard";
 
 export default function CollectionCarousel({ collections }: { collections: Collection[] }) {
     const [currentIndex, setCurrentIndex] = useState(2);
@@ -58,7 +57,7 @@ export default function CollectionCarousel({ collections }: { collections: Colle
 
     return (
         <div className="relative w-full h-100 flex justify-center">
-            {slides.length > 0
+            {count > 1
                 ? slides.map((collection, index) => (
                       <div
                           onClick={() => {
@@ -83,15 +82,19 @@ export default function CollectionCarousel({ collections }: { collections: Colle
                           />
                       </div>
                   ))
-                : Array.from({ length: 5 }).map((_, index) => (
-                      <div
-                          key={index}
-                          style={{ transform: `translateX(${(index - currentIndex) * 75.5}rem)` }}
-                          className={`flex absolute w-full justify-center ${index === currentIndex ? "scale-100" : "scale-90"} ${isResetting ? "transition-none" : "transition-all"} duration-500`}
-                      >
-                          <LoadingCollectionCard size="large" />
+                : count === 1 && (
+                      <div className={`flex absolute w-full justify-center scale-100 ${isResetting ? "transition-none" : "transition-all"} duration-500`}>
+                          <CollectionCard
+                              transition={isResetting ? false : true}
+                              focused={true}
+                              size="large"
+                              title={slides[2]?.name ?? ""}
+                              description={slides[2]?.description}
+                              id={slides[2]?.id ?? 0}
+                              assetId={slides[2]?.assetId ?? 0}
+                          />
                       </div>
-                  ))}
+                  )}
         </div>
     );
 }

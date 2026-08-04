@@ -1,13 +1,13 @@
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import Button from "./Button";
-import Burger from "./icons/Burger";
-import Cart from "./icons/Cart";
-import Night from "./icons/Night";
-import Search from "./icons/Search";
+import BurgerIcon from "./icons/Burger";
+import CartIcon from "./icons/Cart";
+import NightIcon from "./icons/Night";
+import SearchIcon from "./icons/Search";
 import Logo from "./Logo";
 import TextInput from "./TextInput";
-import Day from "./icons/Day";
+import DayIcon from "./icons/Day";
 import NavbarTypeButton from "./NavbarTypeButton";
 import { useRouter } from "next/router";
 import { useCart } from "@/context/CartContext";
@@ -23,7 +23,7 @@ export default function Navbar({ atTop }: { atTop: boolean }) {
 
     return (
         <header
-            className={`fixed z-150 top-0 w-full transition-all duration-300 ease-out ${atTop && !extended ? "bg-transparent border-b border-b-transparent py-6" : "bg-primary/45 light:bg-primary-light/45 border-b border-b-white/30 light:border-b-black/30 py-4 backdrop-blur-[32px] shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)]"}`}
+            className={`fixed z-150 top-0 w-full transition-all duration-300 ease-out ${atTop && !extended ? "bg-transparent border-b border-b-transparent py-6" : "bg-primary/45 light:bg-primary-light/45 border-b border-b-white/10 light:border-b-white/15 py-4 backdrop-blur-[32px] shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] light:shadow-[0px_6px_15px_0px_rgba(0,0,0,0.10)]"}`}
         >
             <div className="flex justify-center">
                 <div className={`max-w-273 w-full flex flex-col transition-all duration-300 ease-out ${atTop ? "min-[940px]:gap-8 gap-3" : "min-[940px]:gap-6 gap-3"} min-[1130px]:px-0 px-4`}>
@@ -32,16 +32,15 @@ export default function Navbar({ atTop }: { atTop: boolean }) {
                             <Logo className="w-auto h-8 self-center" />
                         </button>
                         <TextInput
-                            icon={<Search className="w-4 h-4 text-white/50 light:text-black/50" />}
+                            icon={<SearchIcon className="w-4.5 h-4.5 text-white/50 light:text-black/50" />}
                             placeholder="Search Cosmetics..."
                             className="w-fit min-[940px]:block hidden"
                             value={search}
                             onChange={setSearch}
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") {
-                                    if (!search.trim()) return;
                                     setSearch("");
-                                    router.push(`/search?text=${encodeURIComponent(search)}`);
+                                    router.push(`/search${!search.trim() ? "" : `?text=${encodeURIComponent(search)}`}`);
                                 }
                             }}
                         />
@@ -49,22 +48,21 @@ export default function Navbar({ atTop }: { atTop: boolean }) {
                             <Button
                                 icon={
                                     <>
-                                        <Night className="w-5 h-5 text-text light:hidden" />
-                                        <Day className="w-5 h-5 text-black hidden light:block" />
+                                        <NightIcon className="w-4.5 h-4.5 text-white light:hidden" />
+                                        <DayIcon className="w-4.5 h-4.5 text-black hidden light:block" />
                                     </>
                                 }
                                 color="primary"
                                 className="w-fit"
                                 onClick={toggleTheme}
                             />
-                            {/* <Button icon={<Login className="w-4 h-4 text-text light:text-black" />} label="Login" color="primary" className="w-fit" onClick={() => void 0} /> */}
                             <Button
                                 icon={
                                     <>
-                                        <div className="absolute left-5 w-4 rounded-full bg-blue -translate-y-1.5">
-                                            <p className="text-text text-xs leading-4 font-semibold text-center">{cart?.count || 0}</p>
+                                        <div className="absolute left-5 w-4.5 rounded-full bg-blue -translate-y-1.5">
+                                            <p className="text-white text-xs leading-4 font-semibold text-center">{cart?.count || 0}</p>
                                         </div>
-                                        <Cart className="w-4 h-4 text-text" />
+                                        <CartIcon className="w-4.5 h-4.5 text-white" />
                                     </>
                                 }
                                 label="Cart"
@@ -74,13 +72,13 @@ export default function Navbar({ atTop }: { atTop: boolean }) {
                             />
                         </div>
                         <button className="min-[940px]:hidden block" onClick={() => setExtended(!extended)}>
-                            <Burger className="w-8 h-8" />
+                            <BurgerIcon className="w-8 h-8" />
                         </button>
                     </div>
                     {extended && (
                         <div className="flex flex-col w-full gap-3 pt-2">
                             <TextInput
-                                icon={<Search className="w-4 h-4 text-white/50 light:text-black/50" />}
+                                icon={<SearchIcon className="w-4.5 h-4.5 text-white/50 light:text-black/50" />}
                                 placeholder="Search Cosmetics..."
                                 className="w-full"
                                 value={search}
@@ -94,15 +92,24 @@ export default function Navbar({ atTop }: { atTop: boolean }) {
                                 }}
                             />
                             <div className="flex flex-row gap-3 w-full">
-                                <Button icon={<Night className="w-5 h-5 text-text light:text-black" />} color="primary" className="w-fit" onClick={toggleTheme} />
-                                {/* <Button icon={<Login className="w-4 h-4 text-text light:text-black" />} label="Login" color="primary" className="w-full" onClick={() => void 0} /> */}
+                                <Button
+                                    icon={
+                                        <>
+                                            <NightIcon className="w-4.5 h-4.5 text-white light:hidden" />
+                                            <DayIcon className="w-4.5 h-4.5 text-black hidden light:block" />
+                                        </>
+                                    }
+                                    color="primary"
+                                    className="w-fit"
+                                    onClick={toggleTheme}
+                                />
                                 <Button
                                     icon={
                                         <div className="relative">
-                                            <div className="absolute left-2 w-4 rounded-full bg-blue -translate-y-1.5">
-                                                <p className="text-text text-xs leading-4 font-semibold text-center">12</p>
+                                            <div className="absolute left-2 w-4.5 rounded-full bg-blue -translate-y-1.5">
+                                                <p className="text-white text-xs leading-4 font-semibold text-center">12</p>
                                             </div>
-                                            <Cart className="w-4 h-4 text-text" />
+                                            <CartIcon className="w-4.5 h-4.5 text-white" />
                                         </div>
                                     }
                                     label="Cart"

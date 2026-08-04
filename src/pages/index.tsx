@@ -2,49 +2,33 @@ import CollectionCard from "@/components/CollectionCard";
 import CollectionCarousel from "@/components/CollectionCarousel";
 import ItemCard from "@/components/ItemCard";
 import ItemCarousel from "@/components/ItemCarousel";
-import LoadingCollectionCard from "@/components/LoadingCollectionCard";
-import LoadingItemCard from "@/components/LoadingItemCard";
 import { Collection } from "@/types/Collection";
 import { Item } from "@/types/Item";
-import { getCollections, searchCosmetics } from "@/utils/APIUtils";
+import { getCollections, searchCosmetics, toSerializable } from "@/utils/APIUtils";
 import { isNewItem } from "@/utils/TimeUtils";
-import { useEffect, useState } from "react";
+import type { GetServerSideProps } from "next";
 
-export default function Home() {
-    const [collections, setCollections] = useState<Collection[]>([]);
-    const [editorsPick, setEditorsPick] = useState<Item[]>([]);
-    const [newest, setNewest] = useState<Item[]>([]);
+type HomeProps = {
+    collections: Collection[];
+    editorsPick: Item[];
+    newest: Item[];
+};
 
-    useEffect(() => {
-        async function fetchCollections() {
-            const collectionsData = await getCollections();
+export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
+    const [collections, editorsPick, newest] = await Promise.all([
+        getCollections(),
+        searchCosmetics({ tags: "editor" })
+            .then((data) => data.items)
+            .catch(() => []),
+        searchCosmetics({ sort: "newest", nb: 10 })
+            .then((data) => data.items)
+            .catch(() => []),
+    ]);
 
-            setCollections(collectionsData);
-        }
+    return { props: toSerializable({ collections, editorsPick, newest }) };
+};
 
-        fetchCollections();
-    }, []);
-
-    useEffect(() => {
-        async function fetchEditorsPick() {
-            const cosmeticsData = await searchCosmetics({ tags: "editor" });
-
-            setEditorsPick(cosmeticsData.items);
-        }
-
-        fetchEditorsPick();
-    }, []);
-
-    useEffect(() => {
-        async function fetchNewest() {
-            const cosmeticsData = await searchCosmetics({ sort: "newest", nb: 10 });
-
-            setNewest(cosmeticsData.items);
-        }
-
-        fetchNewest();
-    }, []);
-
+export default function Home({ collections, editorsPick, newest }: HomeProps) {
     return (
         <>
             <section className="relative overflow-hidden">
@@ -55,73 +39,45 @@ export default function Home() {
             <section className="relative overflow-hidden">
                 <div className="max-w-273 mx-auto flex flex-col justify-center items-center pt-10 min-[1130px]:px-0 px-4">
                     <ItemCarousel title="Editor's Pick" stepSize={228} viewAll="/category/editor">
-                        {editorsPick.length > 0 ? (
-                            <>
-                                {editorsPick.map((cosmetic) => (
-                                    <ItemCard
-                                        key={cosmetic.id}
-                                        name={cosmetic.name}
-                                        id={cosmetic.id}
-                                        coverId={cosmetic.coverAssetId}
-                                        price={cosmetic.price}
-                                        discount={cosmetic.discount}
-                                        newItem={isNewItem(cosmetic.createdAt)}
-                                    />
-                                ))}
-                            </>
-                        ) : (
-                            <>
-                                {Array.from({ length: 10 }).map((_, index) => (
-                                    <LoadingItemCard key={index} />
-                                ))}
-                            </>
-                        )}
+                        {editorsPick.map((cosmetic) => (
+                            <ItemCard
+                                key={cosmetic.id}
+                                name={cosmetic.name}
+                                id={cosmetic.id}
+                                coverId={cosmetic.coverAssetId}
+                                price={cosmetic.price}
+                                discount={cosmetic.discount}
+                                newItem={isNewItem(cosmetic.createdAt)}
+                            />
+                        ))}
                     </ItemCarousel>
                 </div>
             </section>
-            <section className="relative overflow-hidden">
-                <div className="max-w-273 mx-auto flex flex-col justify-center items-center pt-10 min-[1130px]:px-0 px-4">
-                    <ItemCarousel title="Collections" stepSize={380}>
-                        {collections.length > 0 ? (
-                            <>
-                                {collections.map((collection) => (
-                                    <CollectionCard key={collection.id} size="small" focused title={collection.name} id={collection.id} assetId={collection.assetId} />
-                                ))}
-                            </>
-                        ) : (
-                            <>
-                                {Array.from({ length: 10 }).map((_, index) => (
-                                    <LoadingCollectionCard key={index} size="small" />
-                                ))}
-                            </>
-                        )}
-                    </ItemCarousel>
-                </div>
-            </section>
+            {collections.length > 1 && (
+                <section className="relative overflow-hidden">
+                    <div className="max-w-273 mx-auto flex flex-col justify-center items-center pt-10 min-[1130px]:px-0 px-4">
+                        <ItemCarousel title="Collections" stepSize={380}>
+                            {collections.map((collection) => (
+                                <CollectionCard key={collection.id} size="small" focused title={collection.name} id={collection.id} assetId={collection.assetId} />
+                            ))}
+                        </ItemCarousel>
+                    </div>
+                </section>
+            )}
             <section className="relative overflow-hidden">
                 <div className="max-w-273 mx-auto flex flex-col justify-center items-center py-15 min-[1130px]:px-0 px-4">
                     <ItemCarousel title="Newest" stepSize={228} viewAll="/search?sort=newest">
-                        {newest.length > 0 ? (
-                            <>
-                                {newest.map((cosmetic) => (
-                                    <ItemCard
-                                        key={cosmetic.id}
-                                        name={cosmetic.name}
-                                        id={cosmetic.id}
-                                        coverId={cosmetic.coverAssetId}
-                                        price={cosmetic.price}
-                                        discount={cosmetic.discount}
-                                        newItem={isNewItem(cosmetic.createdAt)}
-                                    />
-                                ))}
-                            </>
-                        ) : (
-                            <>
-                                {Array.from({ length: 10 }).map((_, index) => (
-                                    <LoadingItemCard key={index} />
-                                ))}
-                            </>
-                        )}
+                        {newest.map((cosmetic) => (
+                            <ItemCard
+                                key={cosmetic.id}
+                                name={cosmetic.name}
+                                id={cosmetic.id}
+                                coverId={cosmetic.coverAssetId}
+                                price={cosmetic.price}
+                                discount={cosmetic.discount}
+                                newItem={isNewItem(cosmetic.createdAt)}
+                            />
+                        ))}
                     </ItemCarousel>
                 </div>
             </section>

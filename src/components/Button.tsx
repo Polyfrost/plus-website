@@ -18,11 +18,11 @@ export default function Button({
     const buttonColor = () => {
         switch (color) {
             case "primary":
-                return "bg-primary/50 light:bg-primary-light/50 border-white/30 light:border-white/80";
+                return "bg-primary/50 light:bg-primary-light/50 hover:brightness-110 duration-300 border-white/10 light:border-white/15";
             case "blue":
-                return "bg-blue border-blue-400/30";
+                return "bg-blue border-blue-400/30 hover:brightness-110 duration-300";
             case "red":
-                return "bg-red border-red-400/30";
+                return "bg-red border-red-400/30 hover:brightness-110 duration-300";
         }
     };
 
@@ -30,13 +30,13 @@ export default function Button({
         <button
             onClick={onClick}
             disabled={disabled}
-            className={`${buttonColor()} ${className} disabled:opacity-50 disabled:cursor-not-allowed border relative rounded-md shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] select-none`}
+            className={`${buttonColor()} ${className} disabled:opacity-50 disabled:cursor-not-allowed border relative rounded-lg shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] light:shadow-[0px_6px_15px_0px_rgba(0,0,0,0.10)] select-none`}
             style={{ paddingRight: addedWidth, paddingLeft: addedWidth }}
         >
             {label ? (
                 <div className="flex flex-row items-center justify-center gap-2 px-3 py-1">
                     {icon && icon}
-                    {label && <p className={`${color === "primary" ? "text-text light:text-black" : "text-text"} text-sm leading-6 font-medium whitespace-nowrap`}>{label}</p>}
+                    {label && <p className={`${color === "primary" ? "text-white light:text-black" : "text-white"} text-sm leading-6 whitespace-nowrap`}>{label}</p>}
                 </div>
             ) : (
                 <>

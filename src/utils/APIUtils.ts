@@ -4,6 +4,10 @@ import { ItemTag } from "@/types/ItemTag";
 
 type FetchReturn = { res: Response | null; json: any; text: string | null; data: ArrayBuffer | null };
 
+export function toSerializable<T>(value: T): T {
+    return JSON.parse(JSON.stringify(value));
+}
+
 export async function polyFetch(url: string, options?: RequestInit): Promise<FetchReturn> {
     let response = null;
     let json = null;
@@ -46,6 +50,7 @@ export async function getCosmeticById(id: number): Promise<Item> {
             variants: json.variants?.map((variant: any) => ({
                 id: variant.id,
                 name: variant.variant_name,
+                model: variant.model_variant,
                 assetId: variant.asset_id,
                 coverAssetId: variant.cover_asset_id,
             })),

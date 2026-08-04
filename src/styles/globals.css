@@ -1,19 +1,15 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
-/* next-themes puts `class="light"` / `class="dark"` on <html>.
-   Dark is the base design; `light:` utilities apply the light overrides. */
 @custom-variant light (&:where(.light, .light *));
 
 @theme {
     --color-primary: #232d32;
     --color-accent: #1878f1;
-    --color-text: #d5dbff;
-    --color-blue: #3f7ce4;
+    --color-blue: #1878f1;
     --color-green: #239a60;
     --color-red: #ff4444;
-    /* Light-mode primary surface. */
-    --color-primary-light: #ebf2ff;
+    --color-primary-light: #D0D7F3;
 }
 
 @utility glow {

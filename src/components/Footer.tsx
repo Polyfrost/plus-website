@@ -3,7 +3,7 @@ import PolyLogo from "./PolyLogo";
 
 export default function Footer() {
     return (
-        <footer className={`bottom-0 w-full bg-primary/45 light:bg-primary-light/45 border-t border-t-white/30 light:border-t-black/30 py-6 backdrop-blur-lg`}>
+        <footer className={`bottom-0 w-full bg-primary/45 light:bg-primary-light/45 border-t border-t-white/10 light:border-t-white/15 py-6 backdrop-blur-lg`}>
             <div className="flex max-w-273 mx-auto w-full flex-col min-[1130px]:px-0 px-4">
                 <div className="flex min-[800px]:flex-row flex-col items-start justify-between gap-4 min-[800px]:pb-20 pb-6">
                     <div className="flex flex-col gap-1">

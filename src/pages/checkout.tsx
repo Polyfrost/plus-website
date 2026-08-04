@@ -1,36 +1,37 @@
 import Button from "@/components/Button";
 import Checkbox from "@/components/Checkbox";
-import Bag from "@/components/icons/Bag";
-import User from "@/components/icons/User";
+import BagIcon from "@/components/icons/Bag";
+import UserIcon from "@/components/icons/User";
 import ItemCard from "@/components/ItemCard";
 import ItemCarousel from "@/components/ItemCarousel";
 import ItemListCard from "@/components/ItemListCard";
-import LoadingItemCard from "@/components/LoadingItemCard";
 import PageNav from "@/components/PageNav";
 import TextInput from "@/components/TextInput";
 import { useCart } from "@/context/CartContext";
 import { Item } from "@/types/Item";
-import { createStripe, searchCosmetics, usernameToUUID } from "@/utils/APIUtils";
+import { createStripe, searchCosmetics, toSerializable, usernameToUUID } from "@/utils/APIUtils";
 import { isNewItem } from "@/utils/TimeUtils";
+import type { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
 
-export default function Checkout() {
+type CheckoutProps = {
+    editorsPick: Item[];
+};
+
+export const getServerSideProps: GetServerSideProps<CheckoutProps> = async () => {
+    const editorsPick = await searchCosmetics({ tags: "editor" })
+        .then((data) => data.items)
+        .catch(() => []);
+
+    return { props: toSerializable({ editorsPick }) };
+};
+
+export default function Checkout({ editorsPick }: CheckoutProps) {
     const [username, setUsername] = useState<string>("");
     const [uuid, setUUID] = useState<string | null>(null);
     const [acceptedTerms, setAcceptedTerms] = useState<boolean>(false);
 
-    const [editorsPick, setEditorsPick] = useState<Item[]>([]);
     const cart = useCart();
-
-    useEffect(() => {
-        async function fetchEditorsPick() {
-            const cosmeticsData = await searchCosmetics({ tags: "editor" });
-
-            setEditorsPick(cosmeticsData.items);
-        }
-
-        fetchEditorsPick();
-    }, []);
 
     useEffect(() => {
         async function fetchUUID() {
@@ -105,7 +106,7 @@ export default function Checkout() {
                                     {uuid && <img className="h-5 w-5" src={`https://nmsr.nickac.dev/face/${uuid}`} alt={`Minecraft face for ${username}`} />}
                                 </div>
                                 <TextInput
-                                    icon={<User className="w-4 h-4 text-white/50 light:text-black/50" />}
+                                    icon={<UserIcon className="w-4.5 h-4.5 text-white/50 light:text-black/50" />}
                                     placeholder="Enter your Minecraft username"
                                     className="w-full"
                                     value={username}
@@ -127,30 +128,17 @@ export default function Checkout() {
                                 </div>
                             </div>
                             <Button
-                                icon={<Bag className="w-4 h-4 text-text" />}
+                                icon={<BagIcon className="w-4.5 h-4.5 text-white" />}
                                 label={`Checkout ${cart?.items!.length} items`}
                                 color="blue"
                                 className="w-full"
                                 onClick={handleStripeCheckout}
                                 disabled={!acceptedTerms || !uuid || cart?.items!.length === 0}
                             />
-                            {/* <div className="flex flex-col gap-3">
-                                <h2 className="text-sm">
-                                    Coupon Codes
-                                </h2>
-                                <div className="flex flex-row gap-4">
-                                    <TextInput icon={<ItemTag className="w-4 h-4 text-white/50 light:text-black/50" />} placeholder="Enter coupon code..." className="w-full" />
-                                    <Button icon={<Check className="w-4 h-4 text-text" />} label="Apply" color="blue" className="w-fit" />
-                                </div>
-                                <div className="flex flex-row flex-wrap gap-2">
-                                    <Tag label="SUMMER20" />
-                                    <Tag label="SUMMER20" />
-                                </div>
-                            </div> */}
                             <Checkbox
                                 id="terms"
                                 customLabel={
-                                    <label htmlFor={`checkbox-terms`} className="text-white light:text-black text-sm pl-2 leading-4.5 cursor-pointer select-none">
+                                    <label htmlFor={`checkbox-terms`} className="text-sm pl-2 leading-4.5 cursor-pointer select-none">
                                         I&apos;ve read & agree to the{" "}
                                         <a className="text-blue" href="https://polyfrost.org/legal/terms" target="_blank">
                                             OneClient Terms of Service
@@ -167,27 +155,17 @@ export default function Checkout() {
             <section className="relative overflow-hidden">
                 <div className="max-w-273 mx-auto flex flex-col justify-center items-center min-[1130px]:px-0 px-4 pt-10 pb-15">
                     <ItemCarousel title="Discover More Cosmetics" stepSize={228}>
-                        {editorsPick.length > 0 ? (
-                            <>
-                                {editorsPick.map((cosmetic) => (
-                                    <ItemCard
-                                        key={cosmetic.id}
-                                        name={cosmetic.name}
-                                        id={cosmetic.id}
-                                        coverId={cosmetic.coverAssetId}
-                                        price={cosmetic.price}
-                                        discount={cosmetic.discount}
-                                        newItem={isNewItem(cosmetic.createdAt)}
-                                    />
-                                ))}
-                            </>
-                        ) : (
-                            <>
-                                {Array.from({ length: 10 }).map((_, index) => (
-                                    <LoadingItemCard key={index} />
-                                ))}
-                            </>
-                        )}
+                        {editorsPick.map((cosmetic) => (
+                            <ItemCard
+                                key={cosmetic.id}
+                                name={cosmetic.name}
+                                id={cosmetic.id}
+                                coverId={cosmetic.coverAssetId}
+                                price={cosmetic.price}
+                                discount={cosmetic.discount}
+                                newItem={isNewItem(cosmetic.createdAt)}
+                            />
+                        ))}
                     </ItemCarousel>
                 </div>
             </section>

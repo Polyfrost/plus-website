@@ -1,4 +1,4 @@
-export default function Login({ className }: { className?: string }) {
+export default function LoginIcon({ className }: { className?: string }) {
     return (
         <svg className={className} viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path

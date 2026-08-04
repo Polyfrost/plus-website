@@ -3,34 +3,49 @@ import ItemCard from "@/components/ItemCard";
 import PageNav from "@/components/PageNav";
 import Tag from "@/components/Tag";
 import { Item } from "@/types/Item";
-import { getTags, searchCosmetics } from "@/utils/APIUtils";
+import { getTags, searchCosmetics, toSerializable } from "@/utils/APIUtils";
 import type { ItemTag } from "@/types/ItemTag";
 import { useRouter } from "next/router";
 import { isNewItem } from "@/utils/TimeUtils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import LoadingItemCard from "@/components/LoadingItemCard";
+import type { GetServerSideProps } from "next";
 
-export default function Search() {
+type SearchProps = {
+    tags: ItemTag[];
+    initialItems: Item[];
+    initialPages: number;
+    initialTotal: number;
+};
+
+export const getServerSideProps: GetServerSideProps<SearchProps> = async ({ query }) => {
+    const text = (query.text as string) || "";
+    const sort = (query.sort as string) || "newest";
+
+    const [tags, data] = await Promise.all([getTags(), searchCosmetics({ text, sort, nb: 12, page: 1 }).catch(() => ({ items: [], total: 0, pages: 1 }))]);
+
+    return { props: toSerializable({ tags, initialItems: data.items, initialPages: data.pages, initialTotal: data.total }) };
+};
+
+export default function Search({ tags, initialItems, initialPages, initialTotal }: SearchProps) {
     const router = useRouter();
     const text = (router.query.text as string) || "";
     const sort = (router.query.sort as string) || "newest";
 
     const validTypes = ["cape", "emote", "wings", "glove", "hat", "boots", "backpack", "glasses", "shoulder", "aura"];
 
-    const [items, setItems] = useState<Item[]>([]);
-    const [pages, setPages] = useState<number>(1);
+    const [items, setItems] = useState<Item[]>(initialItems);
+    const [pages, setPages] = useState<number>(initialPages);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [totalItems, setTotalItems] = useState<number>(0);
-    const [loading, setLoading] = useState<boolean>(true);
-
-    const [tags, setTags] = useState<ItemTag[]>([]);
+    const [totalItems, setTotalItems] = useState<number>(initialTotal);
 
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [selectedColors, setSelectedColors] = useState<string[]>([]);
     const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
 
     const [paginating, setPaginating] = useState<boolean>(false);
+
+    const mounted = useRef(false);
 
     const { ref, inView } = useInView({
         threshold: 1,
@@ -44,14 +59,16 @@ export default function Search() {
         setTotalItems(cosmeticData.total);
         setCurrentPage(page);
         setPaginating(false);
-        setLoading(false);
     };
 
     useEffect(() => {
-        if (router.isReady) {
-            handleCosmeticSearch(1);
+        if (!mounted.current) {
+            mounted.current = true;
+            return;
         }
-    }, [text, sort, selectedTags, selectedColors, selectedTypes, router.isReady]);
+
+        handleCosmeticSearch(1);
+    }, [text, sort, selectedTags, selectedColors, selectedTypes]);
 
     useEffect(() => {
         if (inView && currentPage < pages && !paginating) {
@@ -59,15 +76,6 @@ export default function Search() {
             setCurrentPage((prev) => prev + 1);
         }
     }, [inView, currentPage, pages]);
-
-    useEffect(() => {
-        async function fetchTags() {
-            const tagsData = await getTags();
-            setTags(tagsData);
-        }
-
-        fetchTags();
-    }, []);
 
     return (
         <>
@@ -90,7 +98,7 @@ export default function Search() {
             <section className="relative overflow-hidden">
                 <div className="max-w-273 mx-auto flex flex-col justify-center items-center pt-2 pb-15 min-[1130px]:px-0 px-4">
                     <div className="flex min-[1130px]:flex-row flex-col w-full gap-12">
-                        <div className="min-[1130px]:w-45 w-full shrink-0 h-fit py-2.5 px-4 bg-primary/35 light:bg-primary-light/35 border border-white/30 light:border-white/80 rounded-xl shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)]">
+                        <div className="min-[1130px]:w-45 w-full shrink-0 h-fit py-2.5 px-4 bg-primary/35 light:bg-primary-light/35 border border-white/10 light:border-white/15 rounded-xl shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] light:shadow-[0px_6px_15px_0px_rgba(0,0,0,0.10)]">
                             <div className="flex min-[1130px]:flex-col min-[430px]:flex-row flex-col min-[1130px]:gap-4 min-[430px]:gap-16 gap-4">
                                 <div className="flex flex-col gap-2">
                                     <h2 className="font-medium">Types</h2>
@@ -146,28 +154,19 @@ export default function Search() {
                             </div>
                         </div>
                         <div className="flex flex-col">
-                            <div className="flex flex-row flex-wrap min-[1130px]:gap-x-12 min-[1130px]:justify-start justify-center gap-x-4 gap-y-8">
-                                {!loading ? (
-                                    <>
-                                        {items.map((cosmetic) => (
-                                            <ItemCard
-                                                key={cosmetic.id}
-                                                name={cosmetic.name}
-                                                id={cosmetic.id}
-                                                coverId={cosmetic.coverAssetId}
-                                                price={cosmetic.price}
-                                                discount={cosmetic.discount}
-                                                newItem={isNewItem(cosmetic.createdAt)}
-                                            />
-                                        ))}
-                                    </>
-                                ) : (
-                                    <>
-                                        {Array.from({ length: 8 }).map((_, index) => (
-                                            <LoadingItemCard key={index} />
-                                        ))}
-                                    </>
-                                )}
+                            <div className="grid min-[890px]:grid-cols-4 min-[665px]:grid-cols-3 grid-cols-2 mx-auto w-full min-[1130px]:gap-x-12 min-[430px]:gap-x-8 gap-x-4 min-[1130px]:justify-start justify-center gap-y-8">
+                                {items.map((cosmetic) => (
+                                    <ItemCard
+                                        key={cosmetic.id}
+                                        name={cosmetic.name}
+                                        id={cosmetic.id}
+                                        coverId={cosmetic.coverAssetId}
+                                        price={cosmetic.price}
+                                        discount={cosmetic.discount}
+                                        newItem={isNewItem(cosmetic.createdAt)}
+                                        width="w-full min-[430px]:min-w-45"
+                                    />
+                                ))}
                             </div>
                             {items.length > 0 && currentPage < pages && !paginating && <div ref={ref} className="flex h-0.5 w-full" />}
                         </div>
