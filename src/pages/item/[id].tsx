@@ -111,7 +111,7 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
             skinViewer.controls.target.set(0, 10, 0);
         }
 
-        const assetURL = `${process.env.BACKEND_URL}/asset/${cosmetic.variants?.filter((variant) => variant.model === skinType || !variant.model).find((variant) => variant.id === selectedVariant)?.assetId ?? cosmetic.assetId}`;
+        const assetURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/asset/${cosmetic.variants?.filter((variant) => variant.model === skinType || !variant.model).find((variant) => variant.id === selectedVariant)?.assetId ?? cosmetic.assetId}`;
 
         if (cosmetic.type === "cape") {
             skinViewer.loadCape(assetURL);
@@ -174,7 +174,7 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
                                                     <div className="h-14.5 w-fit bg-primary/50 light:bg-primary-light/50 rounded-lg shrink-0">
                                                         <img
                                                             className="rounded-[5px] h-14.5 w-14.5 border border-white/10 light:border-white/15 object-cover"
-                                                            src={`${process.env.BACKEND_URL}/asset/${variant.coverAssetId}`}
+                                                            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/asset/${variant.coverAssetId}`}
                                                             alt={`Cover image for ${cosmetic.name} variant ${variant.name || "Default"}`}
                                                         />
                                                     </div>

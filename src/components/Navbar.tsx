@@ -40,7 +40,7 @@ export default function Navbar({ atTop }: { atTop: boolean }) {
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") {
                                     setSearch("");
-                                    router.push(`/search${!search.trim() ? "" : `?text=${encodeURIComponent(search)}`}`);
+                                    router.push(`/search${!search.trim() ? "" : `?text=${encodeURIComponent(search)}`}`, undefined, { shallow: true });
                                 }
                             }}
                         />
@@ -87,7 +87,7 @@ export default function Navbar({ atTop }: { atTop: boolean }) {
                                     if (e.key === "Enter") {
                                         if (!search.trim()) return;
                                         setSearch("");
-                                        router.push(`/search?text=${encodeURIComponent(search)}`);
+                                        router.push(`/search?text=${encodeURIComponent(search)}`, undefined, { shallow: true });
                                     }
                                 }}
                             />

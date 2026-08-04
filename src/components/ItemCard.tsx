@@ -24,7 +24,7 @@ export default function ItemCard({ name, newItem, id, coverId, price, discount, 
                 )}
                 <div className="flex flex-col gap-1.5 px-4 pt-4 pb-2.5">
                     <div className="h-40 w-full bg-primary/50 light:bg-primary-light/50 rounded-lg">
-                        <img className="rounded-[5px] h-40 w-full border border-white/10 light:border-white/15 object-cover" src={`${process.env.BACKEND_URL}/asset/${coverId}`} alt={`Cover image for ${name}`} />
+                        <img className="rounded-[5px] h-40 w-full border border-white/10 light:border-white/15 object-cover" src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/asset/${coverId}`} alt={`Cover image for ${name}`} />
                     </div>
                     <div className="flex flex-col text-start">
                         <h1 className="text-sm leading-6 truncate">{name}</h1>

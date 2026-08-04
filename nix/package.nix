@@ -83,10 +83,10 @@ buildNpmPackage {
     env = {
         NEXT_TELEMETRY_DISABLED = "1";
 
-        # NOTE: next inlines `env` entries from next.config.ts into the client
-        # bundle at build time, so this is baked in and cannot be changed at
-        # runtime. Override the package to change it.
-        BACKEND_URL = backendUrl;
+        # NOTE: next inlines NEXT_PUBLIC_* vars into the client bundle at build
+        # time, so this is baked in and cannot be changed at runtime. Override
+        # the package to change it.
+        NEXT_PUBLIC_BACKEND_URL = backendUrl;
     };
 
     installPhase = ''

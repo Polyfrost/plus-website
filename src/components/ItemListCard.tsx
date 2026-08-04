@@ -9,7 +9,7 @@ export default function ItemListCard({ name, description, id, coverId, price, di
             <div className="absolute inset-0 rounded-xl bg-linear-to-b from-white/5 to-transparent" />
             <div className="flex flex-row gap-4">
                 <div className="h-14.5 w-fit bg-primary/50 light:bg-primary-light/50 rounded-lg shrink-0">
-                    <img className="rounded-[5px] h-14.5 w-14.5 border border-white/10 light:border-white/15 object-cover" src={`${process.env.BACKEND_URL}/asset/${coverId}`} alt={`Cover image for ${name}`} />
+                    <img className="rounded-[5px] h-14.5 w-14.5 border border-white/10 light:border-white/15 object-cover" src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/asset/${coverId}`} alt={`Cover image for ${name}`} />
                 </div>
                 <div className="flex flex-row justify-between w-full">
                     <div className="flex flex-col">

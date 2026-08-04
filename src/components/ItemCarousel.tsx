@@ -42,7 +42,7 @@ export default function ItemCarousel({ children, title, stepSize, viewAll }: { c
                 <h1 className="text-lg">{title}</h1>
                 <div className="flex flex-row items-center gap-3.5">
                     {viewAll && (
-                        <button onClick={() => router.push(viewAll)} className="text-white/75 light:text-black/75">
+                        <button onClick={() => router.push(viewAll, undefined, { shallow: true })} className="text-white/75 light:text-black/75">
                             View all
                         </button>
                     )}

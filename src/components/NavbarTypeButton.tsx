@@ -4,7 +4,7 @@ export default function NavbarTypeButton({ atTop, extended, image, name, nav }: 
     const router = useRouter();
 
     return (
-        <button onClick={() => router.push(nav)} className="group flex flex-col gap-0.5 shrink-0 hover:scale-105 duration-300">
+        <button onClick={() => router.push(nav, undefined, { shallow: true })} className="group flex flex-col gap-0.5 shrink-0 hover:scale-105 duration-300">
             <img
                 src={image}
                 alt={`Icon for ${name} navigation button`}

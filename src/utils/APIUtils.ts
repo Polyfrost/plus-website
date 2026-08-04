@@ -33,7 +33,7 @@ export async function polyFetch(url: string, options?: RequestInit): Promise<Fet
 }
 
 export async function getCosmeticById(id: number): Promise<Item> {
-    const { res, json } = await polyFetch(`${process.env.BACKEND_URL}/cosmetics/view/${id}`);
+    const { res, json } = await polyFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cosmetics/view/${id}`);
     if (res?.ok && json) {
         return {
             name: json.name,
@@ -62,7 +62,7 @@ export async function getCosmeticById(id: number): Promise<Item> {
 
 export async function searchCosmetics(queryItems: { [key: string]: string | number | boolean }): Promise<{ items: Item[]; total: number; pages: number }> {
     const queryString = new URLSearchParams(queryItems as Record<string, string>).toString();
-    const { res, json } = await polyFetch(`${process.env.BACKEND_URL}/cosmetics/search?${queryString}`);
+    const { res, json } = await polyFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cosmetics/search?${queryString}`);
     if (res?.ok && json) {
         return {
             items: json.results.map((cosmetic: any) => ({
@@ -92,7 +92,7 @@ export async function searchCosmetics(queryItems: { [key: string]: string | numb
 }
 
 export async function getTags(): Promise<ItemTag[]> {
-    const { res, json } = await polyFetch(`${process.env.BACKEND_URL}/tags/list`);
+    const { res, json } = await polyFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/tags/list`);
     if (res?.ok && json) {
         return json.tags.map((tag: any) => ({
             name: tag.name,
@@ -106,7 +106,7 @@ export async function getTags(): Promise<ItemTag[]> {
 }
 
 export async function getCollections(): Promise<Collection[]> {
-    const { res, json } = await polyFetch(`${process.env.BACKEND_URL}/collections/list`);
+    const { res, json } = await polyFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/collections/list`);
 
     if (res?.ok && json) {
         return json.collections.map((collection: any) => ({
@@ -122,7 +122,7 @@ export async function getCollections(): Promise<Collection[]> {
 }
 
 export async function createStripe(uuid: string, prices: string[]): Promise<{ url: string } | null> {
-    const { res, json } = await polyFetch(`${process.env.BACKEND_URL}/stripe/create`, {
+    const { res, json } = await polyFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/stripe/create`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
