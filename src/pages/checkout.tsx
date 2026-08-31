@@ -1,15 +1,18 @@
 import Button from "@/components/Button";
 import Checkbox from "@/components/Checkbox";
 import BagIcon from "@/components/icons/Bag";
+import CheckIcon from "@/components/icons/Check";
+import ItemTagIcon from "@/components/icons/ItemTag";
 import UserIcon from "@/components/icons/User";
 import ItemCard from "@/components/ItemCard";
 import ItemCarousel from "@/components/ItemCarousel";
 import ItemListCard from "@/components/ItemListCard";
 import PageNav from "@/components/PageNav";
+import Tag from "@/components/Tag";
 import TextInput from "@/components/TextInput";
 import { useCart } from "@/context/CartContext";
 import { Item } from "@/types/Item";
-import { createStripe, searchCosmetics, toSerializable, usernameToUUID } from "@/utils/APIUtils";
+import { createCheckout, searchCosmetics, toSerializable, usernameToUUID } from "@/utils/APIUtils";
 import { isNewItem } from "@/utils/TimeUtils";
 import type { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
@@ -30,6 +33,8 @@ export default function Checkout({ editorsPick }: CheckoutProps) {
     const [username, setUsername] = useState<string>("");
     const [uuid, setUUID] = useState<string | null>(null);
     const [acceptedTerms, setAcceptedTerms] = useState<boolean>(false);
+    const [promoCode, setPromoCode] = useState<string>("");
+    const [promoCodes, setPromoCodes] = useState<string[]>([]);
 
     const cart = useCart();
 
@@ -50,7 +55,7 @@ export default function Checkout({ editorsPick }: CheckoutProps) {
         return () => clearTimeout(timeout);
     }, [username]);
 
-    const handleStripeCheckout = async () => {
+    const handleCheckout = async () => {
         if (!uuid) {
             alert("Please enter a valid Minecraft username.");
             return;
@@ -66,16 +71,44 @@ export default function Checkout({ editorsPick }: CheckoutProps) {
             return;
         }
 
-        const stripeData = await createStripe(
+        // Silently dropping these would charge for a smaller basket than the
+        // total the page is showing.
+        const unavailable = cart.items.filter((item) => item.productId === undefined);
+        if (unavailable.length > 0) {
+            alert(
+                `These items can't be purchased right now: ${unavailable
+                    .map((item) => item.name)
+                    .join(", ")}. Please remove them from your cart.`
+            );
+            return;
+        }
+
+        const result = await createCheckout(
             uuid,
-            cart.items.filter((item) => item.priceId !== undefined).map((item) => item.priceId!)
+            cart.items.map((item) => item.productId!),
+            promoCodes
         );
 
-        if (stripeData && stripeData.url) {
-            window.location.href = stripeData.url;
+        if ("url" in result) {
+            window.location.href = result.url;
         } else {
-            alert("Failed to create Stripe checkout session.");
+            alert(result.error);
         }
+    };
+
+    const addPromoCode = () => {
+        const code = promoCode.trim().toUpperCase();
+        if (!code || promoCodes.includes(code)) {
+            setPromoCode("");
+            return;
+        }
+
+        setPromoCodes([...promoCodes, code]);
+        setPromoCode("");
+    };
+
+    const removePromoCode = (code: string) => {
+        setPromoCodes(promoCodes.filter((existing) => existing !== code));
     };
 
     return (
@@ -132,9 +165,41 @@ export default function Checkout({ editorsPick }: CheckoutProps) {
                                 label={`Checkout ${cart?.items!.length} items`}
                                 color="blue"
                                 className="w-full"
-                                onClick={handleStripeCheckout}
+                                onClick={handleCheckout}
                                 disabled={!acceptedTerms || !uuid || cart?.items!.length === 0}
                             />
+                            <div className="flex flex-col gap-3">
+                                <h2 className="text-sm">Coupon Codes</h2>
+                                <div className="flex flex-row gap-4">
+                                    <TextInput
+                                        icon={<ItemTagIcon className="w-4.5 h-4.5 text-white/50 light:text-black/50" />}
+                                        placeholder="Enter coupon code..."
+                                        className="w-full"
+                                        value={promoCode}
+                                        onChange={(value) => setPromoCode(value)}
+                                    />
+                                    <Button
+                                        icon={<CheckIcon className="w-4.5 h-4.5 text-white" />}
+                                        label="Apply"
+                                        color="blue"
+                                        className="w-fit"
+                                        onClick={addPromoCode}
+                                        disabled={!promoCode.trim()}
+                                    />
+                                </div>
+                                {promoCodes.length > 0 && (
+                                    <div className="flex flex-row flex-wrap gap-2">
+                                        {promoCodes.map((code) => (
+                                            <Tag key={code} label={code} onClick={() => removePromoCode(code)} />
+                                        ))}
+                                    </div>
+                                )}
+                                {promoCodes.length > 0 && (
+                                    <p className="text-xs text-white/50 light:text-black/50">
+                                        Codes are checked when you continue to payment. Click one to remove it.
+                                    </p>
+                                )}
+                            </div>
                             <Checkbox
                                 id="terms"
                                 customLabel={

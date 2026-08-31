@@ -46,7 +46,7 @@ export async function getCosmeticById(id: number): Promise<Item> {
             coverAssetId: json.cover_asset_id,
             tags: [...json.tags.custom, ...json.tags.colors],
             type: json.type,
-            priceId: json.stripe_price_id,
+            productId: json.store_product_id,
             variants: json.variants?.map((variant: any) => ({
                 id: variant.id,
                 name: variant.variant_name,
@@ -121,21 +121,25 @@ export async function getCollections(): Promise<Collection[]> {
     }
 }
 
-export async function createStripe(uuid: string, prices: string[]): Promise<{ url: string } | null> {
-    const { res, json } = await polyFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/stripe/create`, {
+export type CheckoutResult = { url: string } | { error: string };
+
+export async function createCheckout(uuid: string, products: string[], promoCodes: string[] = []): Promise<CheckoutResult> {
+    const { res, json, text } = await polyFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/checkout/create`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ buyer: uuid, player: uuid, prices }),
+        body: JSON.stringify({ buyer: uuid, player: uuid, products, promo_codes: promoCodes }),
     });
 
     if (res?.ok && json) {
         return { url: json.url };
-    } else {
-        console.error("Failed to create stripe session");
-        return null;
     }
+
+    // The backend names the cosmetics on a 409, so pass its message through
+    // rather than replacing it with something generic.
+    console.error("Failed to create checkout session");
+    return { error: text?.trim() || "Failed to start checkout. Please try again." };
 }
 
 export async function usernameToUUID(username: string): Promise<string | null> {

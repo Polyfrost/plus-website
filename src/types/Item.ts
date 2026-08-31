@@ -9,7 +9,7 @@ export type Item = {
     coverAssetId: number;
     tags: string[];
     type: string;
-    priceId?: string;
+    productId?: string;
     variants: {
         id: number;
         name: string;
