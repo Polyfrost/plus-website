@@ -1,6 +1,6 @@
 import { Item } from "@/types/Item";
 import { getCosmeticById } from "@/utils/APIUtils";
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 
 interface ICartContext {
     items: Item[] | null;
@@ -13,31 +13,80 @@ interface ICartContext {
 
 const CartContext = createContext<ICartContext | null>(null);
 
-function readStored(): Item[] | null {
+// The cart used to persist whole items, price and discount included, and never
+// looked at them again. A sale that started (or ended) after something was
+// added to the cart therefore never showed up, while checkout charged the
+// current price. Only ids are stored now, everything else is re-fetched.
+function readStoredIds(): number[] {
+    let stored: unknown;
     try {
-        return JSON.parse(window.localStorage.getItem("cart") ?? "[]");
+        stored = JSON.parse(window.localStorage.getItem("cart") ?? "[]");
     } catch {
         return [];
     }
+
+    if (!Array.isArray(stored)) return [];
+
+    // Carts written before this change hold whole items, so accept both shapes.
+    return stored
+        .map((entry) => {
+            if (typeof entry === "number") return entry;
+            if (typeof entry === "object" && entry !== null) return (entry as Partial<Item>).id;
+            return undefined;
+        })
+        .filter((id): id is number => Number.isInteger(id));
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
-    const [items, setItems] = useState<Item[] | null>([]);
+    // null until the stored ids have been rehydrated, so consumers can tell an
+    // empty cart apart from one that has not loaded yet.
+    const [items, setItems] = useState<Item[] | null>(null);
+    // How many lines are stored, known before their items arrive. Keeps the
+    // cart badge from flashing a zero at someone who has items.
+    const [storedCount, setStoredCount] = useState<number>(0);
+    // Set once the cart has been emptied deliberately, so a rehydration that is
+    // still in flight cannot put the items back.
+    const discardHydration = useRef<boolean>(false);
 
     useEffect(() => {
-        setItems(readStored());
+        const ids = readStoredIds();
+        setStoredCount(ids.length);
+
+        if (ids.length === 0) {
+            setItems([]);
+            return;
+        }
+
+        let cancelled = false;
+
+        (async () => {
+            const fetched = await Promise.all(ids.map((id) => getCosmeticById(id).catch(() => null)));
+            if (cancelled || discardHydration.current) return;
+
+            // A cosmetic that no longer exists, or is no longer enabled, would
+            // only render as a broken row, so drop it.
+            const rehydrated = fetched.filter((item): item is Item => item !== null);
+
+            // Anything added while the fetches were in flight has to survive.
+            setItems((prev) => [...rehydrated, ...(prev ?? []).filter((item) => !rehydrated.some((other) => other.id === item.id))]);
+        })();
+
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     useEffect(() => {
-        window.localStorage.setItem("cart", JSON.stringify(items));
+        if (items === null) return;
+        window.localStorage.setItem("cart", JSON.stringify(items.map((item) => item.id)));
     }, [items]);
 
     const add = async (id: number) => {
-        const itemData = await getCosmeticById(id);
-        if (itemData) {
+        try {
+            const itemData = await getCosmeticById(id);
             setItems((prev) => (prev ? [...prev, itemData] : [itemData]));
-        } else {
-            console.error("Failed to fetch collections");
+        } catch {
+            console.error(`Failed to fetch cosmetic ${id}`);
         }
     };
 
@@ -45,9 +94,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     const has = (id: number) => items?.some((item) => item.id === id) ?? false;
 
-    const clear = () => setItems([]);
+    const clear = () => {
+        discardHydration.current = true;
+        setStoredCount(0);
+        setItems([]);
+    };
 
-    return <CartContext.Provider value={{ items, add, remove, has, clear, count: items?.length ?? 0 }}>{children}</CartContext.Provider>;
+    return <CartContext.Provider value={{ items, add, remove, has, clear, count: items?.length ?? storedCount }}>{children}</CartContext.Provider>;
 }
 
 export const useCart = () => useContext<ICartContext | null>(CartContext);

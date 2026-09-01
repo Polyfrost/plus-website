@@ -97,7 +97,7 @@ export default function Items({ tags, initialItems, initialPages, initialTotal }
             mountedRef.current = true;
             return;
         }
-        
+
         handleCosmeticSearch(1);
     }, [arg1, arg2, selectedTags, selectedColors, selectedTypes]);
 
