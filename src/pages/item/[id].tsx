@@ -51,6 +51,16 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
     const [skinType, setSkinType] = useState<"slim" | "wide">("wide");
 
     const [selectedVariant, setSelectedVariant] = useState<number>(0);
+    const [webGLSupported, setWebGLSupported] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        try {
+            const canvas = document.createElement("canvas");
+            setWebGLSupported(!!(canvas.getContext("webgl2") || canvas.getContext("webgl")));
+        } catch {
+            setWebGLSupported(false);
+        }
+    }, []);
 
     useEffect(() => {
         setSelectedVariant(cosmetic.variants?.filter((variant) => variant.model === skinType || !variant.model)[0]?.id ?? 0);
@@ -91,15 +101,21 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
     useEffect(() => {
         const canvas = canvasRef.current;
         const box = canvas?.parentElement;
-        if (!canvas || !box) return;
+        if (!canvas || !box || webGLSupported !== true) return;
 
-        const skinViewer = new SkinViewer({
-            canvas,
-            width: 600,
-            height: 480,
-            skin: skinURL,
-            animation: new IdleAnimation(),
-        });
+        let skinViewer: SkinViewer;
+        try {
+            skinViewer = new SkinViewer({
+                canvas,
+                width: 600,
+                height: 480,
+                skin: skinURL,
+                animation: new IdleAnimation(),
+            });
+        } catch {
+            setWebGLSupported(false);
+            return;
+        }
 
         skinViewer.autoRotate = true;
         skinViewer.autoRotateSpeed = 0.3;
@@ -129,7 +145,7 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
             observer.disconnect();
             skinViewer.dispose();
         };
-    }, [cosmetic, selectedVariant, skinURL, skinType]);
+    }, [cosmetic, selectedVariant, skinURL, skinType, webGLSupported]);
 
     return (
         <>
@@ -149,16 +165,26 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
                     <div className="flex min-[1130px]:flex-row flex-col gap-7 w-full pb-5">
                         <div className="flex flex-col gap-2 min-[1130px]:w-4/7 w-full">
                             <div className="relative bg-primary/35 light:bg-primary-light/35 h-120 rounded-xl border border-white/10 light:border-white/15 shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] light:shadow-[0px_6px_15px_0px_rgba(0,0,0,0.10)] overflow-hidden">
-                                <div className="absolute bottom-4 left-4">
-                                    <TextInput
-                                        icon={<UserIcon className="w-4.5 h-4.5 text-white/50 light:text-black/50" />}
-                                        placeholder="Username"
-                                        className="w-40"
-                                        value={username}
-                                        onChange={(value) => setUsername(value)}
+                                {webGLSupported && (
+                                    <div className="absolute bottom-4 left-4">
+                                        <TextInput
+                                            icon={<UserIcon className="w-4.5 h-4.5 text-white/50 light:text-black/50" />}
+                                            placeholder="Username"
+                                            className="w-40"
+                                            value={username}
+                                            onChange={(value) => setUsername(value)}
+                                        />
+                                    </div>
+                                )}
+                                {!webGLSupported ? (
+                                    <img
+                                        className="w-full h-full object-contain"
+                                        src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/asset/${cosmetic.variants?.filter((variant) => variant.model === skinType || !variant.model).find((variant) => variant.id === selectedVariant)?.coverAssetId ?? cosmetic.coverAssetId}`}
+                                        alt={`Cover image for ${cosmetic.name}`}
                                     />
-                                </div>
-                                <canvas ref={canvasRef} className={`hover:cursor-pointer active:cursor-move`} />
+                                ) : (
+                                    <canvas ref={canvasRef} className={`hover:cursor-pointer active:cursor-move`} />
+                                )}
                             </div>
                             {cosmetic.variants && cosmetic.variants.length > 1 && (
                                 <>
