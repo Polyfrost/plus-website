@@ -16,6 +16,7 @@ import { Item } from "@/types/Item";
 import TextInput from "@/components/TextInput";
 import UserIcon from "@/components/icons/User";
 import type { GetServerSideProps } from "next";
+import { effectiveCents, formatUsd, hasDiscount, toCents } from "@/utils/PriceUtils";
 
 type IdProps = {
     cosmetic: Item;
@@ -44,6 +45,11 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
     const router = useRouter();
     const cart = useCart();
     const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    const price = cosmetic.price;
+    const onSale = hasDiscount(cosmetic.discount);
+    // A cosmetic with no price set cannot be bought.
+    const unavailable = price === null || price === undefined;
 
     const [username, setUsername] = useState<string>("");
     const [uuid, setUUID] = useState<string | null>(null);
@@ -190,24 +196,30 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
                                 <>
                                     <h1 className="text-lg">Variants</h1>
                                     <div className="flex flex-row flex-wrap gap-2">
-                                        {cosmetic.variants.filter((variant) => variant.model === skinType || !variant.model).map((variant, index) => (
-                                            <button
-                                                className={`${selectedVariant === variant.id ? "bg-blue border-blue-400/30" : "bg-primary/50 light:bg-primary-light/50 border-white/10 light:border-white/15"} border duration-300 relative p-2 rounded-md shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] light:shadow-[0px_6px_15px_0px_rgba(0,0,0,0.10)] select-none`}
-                                                onClick={() => setSelectedVariant(variant.id)}
-                                                key={variant.id}
-                                            >
-                                                <div className="flex flex-col gap-1 justify-center items-center">
-                                                    <div className="h-14.5 w-fit bg-primary/50 light:bg-primary-light/50 rounded-lg shrink-0">
-                                                        <img
-                                                            className="rounded-[5px] h-14.5 w-14.5 border border-white/10 light:border-white/15 object-cover"
-                                                            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/asset/${variant.coverAssetId}`}
-                                                            alt={`Cover image for ${cosmetic.name} variant ${variant.name || "Default"}`}
-                                                        />
+                                        {cosmetic.variants
+                                            .filter((variant) => variant.model === skinType || !variant.model)
+                                            .map((variant, index) => (
+                                                <button
+                                                    className={`${selectedVariant === variant.id ? "bg-blue border-blue-400/30" : "bg-primary/50 light:bg-primary-light/50 border-white/10 light:border-white/15"} border duration-300 relative p-2 rounded-md shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] light:shadow-[0px_6px_15px_0px_rgba(0,0,0,0.10)] select-none`}
+                                                    onClick={() => setSelectedVariant(variant.id)}
+                                                    key={variant.id}
+                                                >
+                                                    <div className="flex flex-col gap-1 justify-center items-center">
+                                                        <div className="h-14.5 w-fit bg-primary/50 light:bg-primary-light/50 rounded-lg shrink-0">
+                                                            <img
+                                                                className="rounded-[5px] h-14.5 w-14.5 border border-white/10 light:border-white/15 object-cover"
+                                                                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/asset/${variant.coverAssetId}`}
+                                                                alt={`Cover image for ${cosmetic.name} variant ${variant.name || "Default"}`}
+                                                            />
+                                                        </div>
+                                                        <p
+                                                            className={`${selectedVariant === variant.id ? "text-white" : "text-white light:text-black"} text-sm leading-6 whitespace-nowrap duration-300`}
+                                                        >
+                                                            {variant.name || "Default"}
+                                                        </p>
                                                     </div>
-                                                    <p className={`${selectedVariant === variant.id ? "text-white" : "text-white light:text-black"} text-sm leading-6 whitespace-nowrap duration-300`}>{variant.name || "Default"}</p>
-                                                </div>
-                                            </button>
-                                        ))}
+                                                </button>
+                                            ))}
                                     </div>
                                 </>
                             )}
@@ -221,8 +233,8 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
                             <h1 className="text-3xl">{cosmetic.name}</h1>
                             <p className="text-sm text-white/75 light:text-black/75 leading-6">{cosmetic.description}</p>
                             <div className="flex flex-row gap-2 items-end">
-                                {cosmetic.discount && <p className="text-red text-md leading-6 line-through">${cosmetic.price.toFixed(2)}</p>}
-                                <p className={`${cosmetic.discount ? "text-green" : ""} text-[32px] leading-10`}>${(cosmetic.price * (1 - (cosmetic.discount || 0) / 100)).toFixed(2)}</p>
+                                {onSale && !unavailable && <p className="text-red text-md leading-6 line-through">{formatUsd(toCents(price))}</p>}
+                                <p className={`${onSale ? "text-green" : ""} text-[32px] leading-10`}>{unavailable ? "Unavailable" : formatUsd(effectiveCents(price, cosmetic.discount))}</p>
                             </div>
                             <div className="flex flex-row gap-4 items-center">
                                 <Button
@@ -231,6 +243,7 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
                                     color="blue"
                                     className="w-full"
                                     onClick={() => (cart?.has(cosmetic.id) ? cart.remove(cosmetic.id) : cart?.add(cosmetic.id))}
+                                    disabled={unavailable}
                                 />
                                 {!cart?.has(cosmetic.id) && (
                                     <Button
@@ -243,6 +256,7 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
                                             cart?.add(cosmetic.id);
                                             router.push("/checkout");
                                         }}
+                                        disabled={unavailable}
                                     />
                                 )}
                             </div>

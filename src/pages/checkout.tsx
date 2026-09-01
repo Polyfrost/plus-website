@@ -14,6 +14,7 @@ import { useCart } from "@/context/CartContext";
 import { Item } from "@/types/Item";
 import { createCheckout, searchCosmetics, toSerializable, usernameToUUID } from "@/utils/APIUtils";
 import { isNewItem } from "@/utils/TimeUtils";
+import { effectiveCents, formatUsd, toCents } from "@/utils/PriceUtils";
 import type { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
 
@@ -40,6 +41,11 @@ export default function Checkout({ editorsPick }: CheckoutProps) {
     // null while the cart is rehydrating its prices from the API.
     const items = cart?.items ?? null;
     const loading = items === null;
+
+    // Rounded per line, then summed, so these match what the backend charges.
+    const subtotalCents = (items ?? []).reduce((total, item) => total + toCents(item.price ?? 0), 0);
+    const totalCents = (items ?? []).reduce((total, item) => total + effectiveCents(item.price ?? 0, item.discount), 0);
+    const discountCents = subtotalCents - totalCents;
 
     useEffect(() => {
         async function fetchUUID() {
@@ -76,7 +82,7 @@ export default function Checkout({ editorsPick }: CheckoutProps) {
 
         // Silently dropping these would charge for a smaller basket than the
         // total the page is showing.
-        const unavailable = cart.items.filter((item) => item.productId === undefined);
+        const unavailable = cart.items.filter((item) => !item.productId || item.price === null);
         if (unavailable.length > 0) {
             alert(`These items can't be purchased right now: ${unavailable.map((item) => item.name).join(", ")}. Please remove them from your cart.`);
             return;
@@ -149,15 +155,15 @@ export default function Checkout({ editorsPick }: CheckoutProps) {
                             <div className="flex flex-col gap-1">
                                 <div className="flex flex-row justify-between items-center">
                                     <h1 className="text-xl font-medium">Total</h1>
-                                    <p className="text-2xl font-medium">{loading ? "-" : `$${items.reduce((total, item) => total + item.price * (1 - (item.discount || 0) / 100), 0).toFixed(2)}`}</p>
+                                    <p className="text-2xl font-medium">{loading ? "-" : formatUsd(totalCents)}</p>
                                 </div>
                                 <div className="flex flex-row justify-between items-center">
                                     <h1 className="text-sm">Subtotal</h1>
-                                    <p className="text-sm">{loading ? "-" : `$${items.reduce((total, item) => total + item.price, 0).toFixed(2)}`}</p>
+                                    <p className="text-sm">{loading ? "-" : formatUsd(subtotalCents)}</p>
                                 </div>
                                 <div className="flex flex-row justify-between items-center">
                                     <h1 className="text-sm">Discounts</h1>
-                                    <p className="text-sm text-green">{loading ? "-" : `-$${items.reduce((total, item) => total + (item.price * (item.discount || 0)) / 100, 0).toFixed(2)}`}</p>
+                                    <p className="text-sm text-green">{loading ? "-" : `-${formatUsd(discountCents)}`}</p>
                                 </div>
                             </div>
                             <Button

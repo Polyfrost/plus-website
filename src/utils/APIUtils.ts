@@ -38,15 +38,15 @@ export async function getCosmeticById(id: number): Promise<Item> {
         return {
             name: json.name,
             description: json.description,
-            price: json.base_price,
-            discount: json.discount_rate,
+            price: json.base_price ?? null,
+            discount: json.discount_rate ?? null,
             createdAt: json.created_at,
             id: json.id,
             assetId: json.asset_id,
             coverAssetId: json.cover_asset_id,
             tags: [...json.tags.custom, ...json.tags.colors],
             type: json.type,
-            productId: json.store_product_id,
+            productId: json.store_product_id ?? undefined,
             variants: json.variants?.map((variant: any) => ({
                 id: variant.id,
                 name: variant.variant_name,
@@ -68,14 +68,17 @@ export async function searchCosmetics(queryItems: { [key: string]: string | numb
             items: json.results.map((cosmetic: any) => ({
                 name: cosmetic.name,
                 description: cosmetic.description,
-                price: cosmetic.base_price,
-                discount: cosmetic.discount_rate,
+                price: cosmetic.base_price ?? null,
+                discount: cosmetic.discount_rate ?? null,
                 createdAt: cosmetic.created_at,
                 id: cosmetic.id,
                 assetId: cosmetic.asset_id,
                 coverAssetId: cosmetic.cover_asset_id,
                 tags: [...cosmetic.tags.custom, ...cosmetic.tags.colors],
                 type: cosmetic.type,
+                // Older backends omit this from search results, which just
+                // leaves the item unpurchasable until they catch up.
+                productId: cosmetic.store_product_id ?? undefined,
                 variants: cosmetic.variants?.map((variant: any) => ({
                     id: variant.id,
                     name: variant.variant_name,
