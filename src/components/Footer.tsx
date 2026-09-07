@@ -48,6 +48,14 @@ export default function Footer() {
                             >
                                 Privacy Policy
                             </a>
+                            <a
+                                className="text-white/75 light:text-black/75 text-sm hover:text-white/90 light:hover:text-black/90 duration-300"
+                                href="https://paynow.gg/legal/terms-of-use"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                PayNow Terms of Use
+                            </a>
                         </div>
                         <div className="flex flex-col gap-2">
                             <h1 className="font-medium pb-1">Social</h1>
