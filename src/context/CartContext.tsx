@@ -13,10 +13,6 @@ interface ICartContext {
 
 const CartContext = createContext<ICartContext | null>(null);
 
-// The cart used to persist whole items, price and discount included, and never
-// looked at them again. A sale that started (or ended) after something was
-// added to the cart therefore never showed up, while checkout charged the
-// current price. Only ids are stored now, everything else is re-fetched.
 function readStoredIds(): number[] {
     let stored: unknown;
     try {
@@ -27,7 +23,6 @@ function readStoredIds(): number[] {
 
     if (!Array.isArray(stored)) return [];
 
-    // Carts written before this change hold whole items, so accept both shapes.
     return stored
         .map((entry) => {
             if (typeof entry === "number") return entry;
@@ -38,14 +33,8 @@ function readStoredIds(): number[] {
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
-    // null until the stored ids have been rehydrated, so consumers can tell an
-    // empty cart apart from one that has not loaded yet.
     const [items, setItems] = useState<Item[] | null>(null);
-    // How many lines are stored, known before their items arrive. Keeps the
-    // cart badge from flashing a zero at someone who has items.
     const [storedCount, setStoredCount] = useState<number>(0);
-    // Set once the cart has been emptied deliberately, so a rehydration that is
-    // still in flight cannot put the items back.
     const discardHydration = useRef<boolean>(false);
 
     useEffect(() => {
@@ -63,8 +52,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
             const fetched = await Promise.all(ids.map((id) => getCosmeticById(id).catch(() => null)));
             if (cancelled || discardHydration.current) return;
 
-            // A cosmetic that no longer exists, or is no longer enabled, would
-            // only render as a broken row, so drop it.
             const rehydrated = fetched.filter((item): item is Item => item !== null);
 
             // Anything added while the fetches were in flight has to survive.

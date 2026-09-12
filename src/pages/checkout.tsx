@@ -166,14 +166,6 @@ export default function Checkout({ editorsPick }: CheckoutProps) {
                                     <p className="text-sm text-green">{loading ? "-" : `-${formatUsd(discountCents)}`}</p>
                                 </div>
                             </div>
-                            <Button
-                                icon={<BagIcon className="w-4.5 h-4.5 text-white" />}
-                                label={`Checkout ${items?.length ?? 0} items`}
-                                color="blue"
-                                className="w-full"
-                                onClick={handleCheckout}
-                                disabled={!acceptedTerms || !uuid || !items || items.length === 0}
-                            />
                             <div className="flex flex-col gap-3">
                                 <h2 className="text-sm">Coupon Codes</h2>
                                 <div className="flex flex-row gap-4">
@@ -207,6 +199,14 @@ export default function Checkout({ editorsPick }: CheckoutProps) {
                                 }
                                 checked={acceptedTerms}
                                 onChange={(checked) => setAcceptedTerms(checked)}
+                            />
+                            <Button
+                                icon={<BagIcon className="w-4.5 h-4.5 text-white" />}
+                                label={`Checkout ${items?.length ?? 0} items`}
+                                color="blue"
+                                className="w-full"
+                                onClick={handleCheckout}
+                                disabled={!acceptedTerms || !uuid || !items || items.length === 0}
                             />
                         </div>
                     </div>

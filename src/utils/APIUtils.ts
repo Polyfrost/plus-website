@@ -103,7 +103,7 @@ export async function getTags(): Promise<ItemTag[]> {
             tagType: tag.tag_type,
         }));
     } else {
-        console.error("Failed to fetch tags");
+        console.error("Failed to fetch tags", res?.status, res?.statusText);
         return [];
     }
 }
@@ -119,7 +119,7 @@ export async function getCollections(): Promise<Collection[]> {
             assetId: collection.asset_id,
         }));
     } else {
-        console.error("Failed to fetch collections");
+        console.error("Failed to fetch collections", res?.status, res?.statusText);
         return [];
     }
 }

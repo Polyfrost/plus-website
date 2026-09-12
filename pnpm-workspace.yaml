@@ -1,0 +1,4 @@
+allowBuilds:
+  sharp: true
+  skinview3d@https://codeload.github.com/Polyfrost/skinview3d/tar.gz/6ae54c07636b14f0bbd7be16640a2fe6e2f1605f: true
+  unrs-resolver: true
