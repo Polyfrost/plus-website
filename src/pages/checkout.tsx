@@ -14,6 +14,7 @@ import { useCart } from "@/context/CartContext";
 import { Item } from "@/types/Item";
 import { createCheckout, searchCosmetics, toSerializable, usernameToUUID } from "@/utils/APIUtils";
 import { isNewItem } from "@/utils/TimeUtils";
+import { effectiveCents, formatUsd, toCents } from "@/utils/PriceUtils";
 import type { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
 
@@ -37,6 +38,14 @@ export default function Checkout({ editorsPick }: CheckoutProps) {
     const [promoCodes, setPromoCodes] = useState<string[]>([]);
 
     const cart = useCart();
+    // null while the cart is rehydrating its prices from the API.
+    const items = cart?.items ?? null;
+    const loading = items === null;
+
+    // Rounded per line, then summed, so these match what the backend charges.
+    const subtotalCents = (items ?? []).reduce((total, item) => total + toCents(item.price ?? 0), 0);
+    const totalCents = (items ?? []).reduce((total, item) => total + effectiveCents(item.price ?? 0, item.discount), 0);
+    const discountCents = subtotalCents - totalCents;
 
     useEffect(() => {
         async function fetchUUID() {
@@ -73,13 +82,9 @@ export default function Checkout({ editorsPick }: CheckoutProps) {
 
         // Silently dropping these would charge for a smaller basket than the
         // total the page is showing.
-        const unavailable = cart.items.filter((item) => item.productId === undefined);
+        const unavailable = cart.items.filter((item) => !item.productId || item.price === null);
         if (unavailable.length > 0) {
-            alert(
-                `These items can't be purchased right now: ${unavailable
-                    .map((item) => item.name)
-                    .join(", ")}. Please remove them from your cart.`
-            );
+            alert(`These items can't be purchased right now: ${unavailable.map((item) => item.name).join(", ")}. Please remove them from your cart.`);
             return;
         }
 
@@ -127,10 +132,11 @@ export default function Checkout({ editorsPick }: CheckoutProps) {
                 <div className="max-w-273 mx-auto flex flex-col pt-2 min-[1130px]:px-0 px-4">
                     <div className="flex min-[900px]:flex-row flex-col gap-8 w-full">
                         <div className="flex flex-col gap-3 min-[900px]:w-2/3 w-full pb-5">
-                            {cart?.items!.map((item) => (
+                            {items?.map((item) => (
                                 <ItemListCard key={item.id} name={item.name} description={item.description} id={item.id} coverId={item.coverAssetId} price={item.price} discount={item.discount} />
                             ))}
-                            {cart?.items!.length === 0 && <p className="text-center">No Items {`:(`}</p>}
+                            {loading && <p className="text-center">Loading your cart...</p>}
+                            {items?.length === 0 && <p className="text-center">No Items {`:(`}</p>}
                         </div>
                         <div className="flex flex-col gap-5 min-[900px]:w-1/3 w-full">
                             <div className="flex flex-col gap-3">
@@ -149,25 +155,17 @@ export default function Checkout({ editorsPick }: CheckoutProps) {
                             <div className="flex flex-col gap-1">
                                 <div className="flex flex-row justify-between items-center">
                                     <h1 className="text-xl font-medium">Total</h1>
-                                    <p className="text-2xl font-medium">${cart?.items!.reduce((total, item) => total + item.price * (1 - (item.discount || 0) / 100), 0).toFixed(2)}</p>
+                                    <p className="text-2xl font-medium">{loading ? "-" : formatUsd(totalCents)}</p>
                                 </div>
                                 <div className="flex flex-row justify-between items-center">
                                     <h1 className="text-sm">Subtotal</h1>
-                                    <p className="text-sm">${cart?.items!.reduce((total, item) => total + item.price, 0).toFixed(2)}</p>
+                                    <p className="text-sm">{loading ? "-" : formatUsd(subtotalCents)}</p>
                                 </div>
                                 <div className="flex flex-row justify-between items-center">
                                     <h1 className="text-sm">Discounts</h1>
-                                    <p className="text-sm text-green">-${cart?.items!.reduce((total, item) => total + (item.price * (item.discount || 0)) / 100, 0).toFixed(2)}</p>
+                                    <p className="text-sm text-green">{loading ? "-" : `-${formatUsd(discountCents)}`}</p>
                                 </div>
                             </div>
-                            <Button
-                                icon={<BagIcon className="w-4.5 h-4.5 text-white" />}
-                                label={`Checkout ${cart?.items!.length} items`}
-                                color="blue"
-                                className="w-full"
-                                onClick={handleCheckout}
-                                disabled={!acceptedTerms || !uuid || cart?.items!.length === 0}
-                            />
                             <div className="flex flex-col gap-3">
                                 <h2 className="text-sm">Coupon Codes</h2>
                                 <div className="flex flex-row gap-4">
@@ -178,14 +176,7 @@ export default function Checkout({ editorsPick }: CheckoutProps) {
                                         value={promoCode}
                                         onChange={(value) => setPromoCode(value)}
                                     />
-                                    <Button
-                                        icon={<CheckIcon className="w-4.5 h-4.5 text-white" />}
-                                        label="Apply"
-                                        color="blue"
-                                        className="w-fit"
-                                        onClick={addPromoCode}
-                                        disabled={!promoCode.trim()}
-                                    />
+                                    <Button icon={<CheckIcon className="w-4.5 h-4.5 text-white" />} label="Apply" color="blue" className="w-fit" onClick={addPromoCode} disabled={!promoCode.trim()} />
                                 </div>
                                 {promoCodes.length > 0 && (
                                     <div className="flex flex-row flex-wrap gap-2">
@@ -194,11 +185,7 @@ export default function Checkout({ editorsPick }: CheckoutProps) {
                                         ))}
                                     </div>
                                 )}
-                                {promoCodes.length > 0 && (
-                                    <p className="text-xs text-white/50 light:text-black/50">
-                                        Codes are checked when you continue to payment. Click one to remove it.
-                                    </p>
-                                )}
+                                {promoCodes.length > 0 && <p className="text-xs text-white/50 light:text-black/50">Codes are checked when you continue to payment. Click one to remove it.</p>}
                             </div>
                             <Checkbox
                                 id="terms"
@@ -212,6 +199,14 @@ export default function Checkout({ editorsPick }: CheckoutProps) {
                                 }
                                 checked={acceptedTerms}
                                 onChange={(checked) => setAcceptedTerms(checked)}
+                            />
+                            <Button
+                                icon={<BagIcon className="w-4.5 h-4.5 text-white" />}
+                                label={`Checkout ${items?.length ?? 0} items`}
+                                color="blue"
+                                className="w-full"
+                                onClick={handleCheckout}
+                                disabled={!acceptedTerms || !uuid || !items || items.length === 0}
                             />
                         </div>
                     </div>

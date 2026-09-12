@@ -2,8 +2,10 @@ export type Item = {
     id: number;
     name: string;
     description: string;
-    price: number;
-    discount: number;
+    /** USD, major units. Null for a cosmetic with no price set. */
+    price: number | null;
+    /** Integer percent off, 0-100. Null when the cosmetic is not on sale. */
+    discount: number | null;
     createdAt: string;
     assetId: number;
     coverAssetId: number;

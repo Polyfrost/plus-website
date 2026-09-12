@@ -19,7 +19,7 @@ export default function Checkbox({
                 <input
                     id={`checkbox-${id}`}
                     type="checkbox"
-                    className="peer appearance-none h-4 w-4 border border-white/10 light:border-white/15 rounded-[3px] bg-primary light:bg-primary-light checked:bg-blue duration-300 cursor-pointer"
+                    className="peer appearance-none h-4 w-4 outline outline-white/10 light:outline-white/15 rounded-[3px] bg-primary light:bg-primary-light checked:bg-blue duration-300 cursor-pointer"
                     checked={checked}
                     onChange={(e) => onChange?.(e.target.checked)}
                 />
