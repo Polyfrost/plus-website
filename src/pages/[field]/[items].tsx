@@ -36,7 +36,7 @@ export default function Items({ tags, initialItems, initialPages, initialTotal }
     const arg2 = router.query.items as string;
 
     const validArg1s = ["type", "category", "collection"];
-    const validTypes = ["cape", "emote", "wings", "glove", "hat", "boots", "backpack", "glasses", "shoulder", "aura"];
+    const validTypes = ["cape", "wings", "glove", "hat", "boots", "backpack", "shoulder", "aura"];
 
     const [items, setItems] = useState<Item[]>(initialItems);
     const [pages, setPages] = useState<number>(initialPages);

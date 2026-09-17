@@ -32,7 +32,7 @@ export default function Search({ tags, initialItems, initialPages, initialTotal 
     const text = (router.query.text as string) || "";
     const sort = (router.query.sort as string) || "newest";
 
-    const validTypes = ["cape", "emote", "wings", "glove", "hat", "boots", "backpack", "glasses", "shoulder", "aura"];
+    const validTypes = ["cape", "wings", "glove", "hat", "boots", "backpack", "shoulder", "aura"];
 
     const [items, setItems] = useState<Item[]>(initialItems);
     const [pages, setPages] = useState<number>(initialPages);

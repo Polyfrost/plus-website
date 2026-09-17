@@ -9,7 +9,7 @@ import { getCosmeticById, searchCosmetics, toSerializable, usernameToUUID, UUIDT
 import { useRouter } from "next/router";
 import { isNewItem } from "@/utils/TimeUtils";
 import { useEffect, useRef, useState } from "react";
-import { IdleAnimation, SkinViewer, loadCosmeticFromZip } from "skinview3d";
+import { IdleAnimation, SkinViewer, loadCosmeticAsset } from "skinview3d";
 import { useCart } from "@/context/CartContext";
 import CheckIcon from "@/components/icons/Check";
 import { Item } from "@/types/Item";
@@ -135,11 +135,7 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
 
         const assetURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/asset/${cosmetic.variants?.filter((variant) => variant.model === skinType || !variant.model).find((variant) => variant.id === selectedVariant)?.assetId ?? cosmetic.assetId}`;
 
-        if (cosmetic.type === "cape") {
-            skinViewer.loadCape(assetURL);
-        } else {
-            loadCosmeticFromZip(skinViewer, assetURL, { type: cosmetic.type as any });
-        }
+        loadCosmeticAsset(skinViewer, assetURL);
 
         const observer = new ResizeObserver(([entry]) => {
             const { width, height } = entry.contentRect;
