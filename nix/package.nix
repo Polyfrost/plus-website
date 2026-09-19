@@ -56,7 +56,7 @@ buildNpmPackage {
 
     inherit src;
 
-    npmDepsHash = "sha256-hI83KGSUieMZE1lCDpDFK6yr6ol9nWNaFq+JuO9Y+pc=";
+    npmDepsHash = "sha256-But+a5kD0JIJMMAed6zqoPl6lFWT5MiDc9z3xfgfXrA=";
 
     # skinview3d is a git dependency, which prefetch-npm-deps refuses unless
     # explicitly allowed (git revs are not content-addressed by npm). npm also
