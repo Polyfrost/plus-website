@@ -14,8 +14,8 @@ buildNpmPackage rec {
     src = fetchFromGitHub {
         owner = "Polyfrost";
         repo = "skinview3d";
-        rev = "e1444ea37fbdf8b36acf08f653569d5789b4004c";
-        hash = "sha256-EwkcXXLZzbJ81CvNP5xDy7cckuUr+6TO/eFHXlBYjxY=";
+        rev = "6a4d27309f1720220a0a91d09e81a27310201348";
+        hash = "sha256-GE/cCBUzXJ/zsXtISkAwBQqxTCidEIlITNmb4QnKU1c=";
     };
 
     npmDepsHash = "sha256-YT9eHZ0jqelLz0+f4rHRsJyMH95ZmPIMJvxbGbeTbsw=";
