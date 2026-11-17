@@ -9,7 +9,9 @@ import { getCosmeticById, searchCosmetics, toSerializable, usernameToUUID, UUIDT
 import { useRouter } from "next/router";
 import { isNewItem } from "@/utils/TimeUtils";
 import { useEffect, useRef, useState } from "react";
-import { IdleAnimation, SkinViewer, loadCosmeticAsset } from "skinview3d";
+import { Renderer } from "@plusrenderer/renderer";
+import { unzipSync } from "fflate";
+import { loadSkinToCanvas } from "skinview-utils";
 import { useCart } from "@/context/CartContext";
 import CheckIcon from "@/components/icons/Check";
 import { Item } from "@/types/Item";
@@ -17,6 +19,45 @@ import TextInput from "@/components/TextInput";
 import UserIcon from "@/components/icons/User";
 import type { GetServerSideProps } from "next";
 import { effectiveCents, formatUsd, hasDiscount, toCents } from "@/utils/PriceUtils";
+
+const DEFAULT_SKIN = "https://textures.minecraft.net/texture/90b8789136facaa9f87b765140e1c8135e6652f513481bd84e6bd8c44844d7ce";
+
+// Cosmetics hang off the nearest lower slot, so the player goes first.
+const PLAYER_SLOT = 0;
+const COSMETIC_SLOT = 1;
+
+const SPIN_DEGREES_PER_SECOND = 1.8;
+
+// The renderer ships no idle, so sway the arms with a looping emote.
+const armSway = "math.cos(query.anim_time * 115) * 1.7";
+const IDLE_ANIMATION = JSON.stringify({
+    format_version: "1.8.0",
+    animations: {
+        "animation.player.idle": {
+            loop: true,
+            animation_length: Math.PI,
+            bones: {
+                rightArm: { rotation: [0, 0, `3.6 + ${armSway}`] },
+                leftArm: { rotation: [0, 0, `-3.6 - ${armSway}`] },
+            },
+        },
+    },
+});
+
+async function fetchChecked(url: string) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
+    return res;
+}
+
+function cameraFor(type: string) {
+    return {
+        yaw: type === "cape" || type === "wings" || type === "backpack" ? 180 : 0,
+        pitch: 8,
+        distance: type === "wings" ? 105 : 64,
+        targetY: type === "hat" ? 28 : 18,
+    };
+}
 
 type IdProps = {
     cosmetic: Item;
@@ -45,6 +86,7 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
     const router = useRouter();
     const cart = useCart();
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const cameraRef = useRef(cameraFor(cosmetic.type));
 
     const price = cosmetic.price;
     const onSale = hasDiscount(cosmetic.discount);
@@ -53,16 +95,20 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
 
     const [username, setUsername] = useState<string>("");
     const [uuid, setUUID] = useState<string | null>(null);
-    const [skinURL, setSkinURL] = useState<string>("https://textures.minecraft.net/texture/90b8789136facaa9f87b765140e1c8135e6652f513481bd84e6bd8c44844d7ce");
+    const [skinURL, setSkinURL] = useState<string>(DEFAULT_SKIN);
     const [skinType, setSkinType] = useState<"slim" | "wide">("wide");
 
     const [selectedVariant, setSelectedVariant] = useState<number>(0);
     const [webGLSupported, setWebGLSupported] = useState<boolean | null>(null);
+    const [renderer, setRenderer] = useState<Renderer | null>(null);
+
+    const variant = cosmetic.variants?.filter((variant) => variant.model === skinType || !variant.model).find((variant) => variant.id === selectedVariant);
+    const assetId = variant?.assetId ?? cosmetic.assetId;
 
     useEffect(() => {
         try {
             const canvas = document.createElement("canvas");
-            setWebGLSupported(!!(canvas.getContext("webgl2") || canvas.getContext("webgl")));
+            setWebGLSupported(!!canvas.getContext("webgl2"));
         } catch {
             setWebGLSupported(false);
         }
@@ -96,7 +142,7 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
                 setSkinURL(skinURLData.skin);
                 setSkinType(skinURLData.type);
             } else {
-                setSkinURL("https://textures.minecraft.net/texture/90b8789136facaa9f87b765140e1c8135e6652f513481bd84e6bd8c44844d7ce");
+                setSkinURL(DEFAULT_SKIN);
                 setSkinType("wide");
             }
         }
@@ -106,48 +152,140 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        const box = canvas?.parentElement;
-        if (!canvas || !box || webGLSupported !== true) return;
+        if (!canvas || webGLSupported !== true) return;
 
-        let skinViewer: SkinViewer;
-        try {
-            skinViewer = new SkinViewer({
-                canvas,
-                width: 600,
-                height: 480,
-                skin: skinURL,
-                animation: new IdleAnimation(),
+        let disposed = false;
+        let frame = 0;
+        let dragging = false;
+        let lastMs: number | undefined;
+
+        // The wasm instance belongs to this renderer and is collected with it.
+        Renderer.create(canvas)
+            .then((created) => {
+                if (disposed) return;
+                setRenderer(created);
+
+                const draw = (ms: number) => {
+                    if (!dragging && lastMs !== undefined) cameraRef.current.yaw += ((ms - lastMs) / 1000) * SPIN_DEGREES_PER_SECOND;
+                    lastMs = ms;
+                    created.draw(cameraRef.current, ms / 1000);
+                    frame = requestAnimationFrame(draw);
+                };
+                frame = requestAnimationFrame(draw);
+            })
+            .catch((error) => {
+                console.error(error);
+                setWebGLSupported(false);
             });
-        } catch {
-            setWebGLSupported(false);
-            return;
-        }
 
-        skinViewer.autoRotate = true;
-        skinViewer.autoRotateSpeed = 0.3;
-        skinViewer.camera.position.set(0, 0, cosmetic.type === "cape" || cosmetic.type === "wings" || cosmetic.type === "backpack" ? -1 : 1);
-        skinViewer.zoom = cosmetic.type === "wings" ? 0.55 : 0.9;
+        const onPointerDown = (e: PointerEvent) => {
+            dragging = true;
+            canvas.setPointerCapture(e.pointerId);
+        };
+        const onPointerUp = () => (dragging = false);
+        const onPointerMove = (e: PointerEvent) => {
+            if (!dragging) return;
+            const camera = cameraRef.current;
+            camera.yaw += e.movementX * 0.6;
+            camera.pitch = Math.min(89, Math.max(-89, camera.pitch - e.movementY * 0.4));
+        };
+        const onWheel = (e: WheelEvent) => {
+            e.preventDefault();
+            const camera = cameraRef.current;
+            camera.distance = Math.min(160, Math.max(25, camera.distance * Math.exp(e.deltaY * 0.001)));
+        };
 
-        if (cosmetic.type === "hat") {
-            skinViewer.camera.position.y = 10;
-            skinViewer.controls.target.set(0, 10, 0);
-        }
-
-        const assetURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/asset/${cosmetic.variants?.filter((variant) => variant.model === skinType || !variant.model).find((variant) => variant.id === selectedVariant)?.assetId ?? cosmetic.assetId}`;
-
-        loadCosmeticAsset(skinViewer, assetURL);
-
-        const observer = new ResizeObserver(([entry]) => {
-            const { width, height } = entry.contentRect;
-            skinViewer.setSize(width, height);
-        });
-        observer.observe(box);
+        canvas.addEventListener("pointerdown", onPointerDown);
+        canvas.addEventListener("pointerup", onPointerUp);
+        canvas.addEventListener("pointercancel", onPointerUp);
+        canvas.addEventListener("pointermove", onPointerMove);
+        canvas.addEventListener("wheel", onWheel, { passive: false });
 
         return () => {
-            observer.disconnect();
-            skinViewer.dispose();
+            disposed = true;
+            cancelAnimationFrame(frame);
+            setRenderer(null);
+            canvas.removeEventListener("pointerdown", onPointerDown);
+            canvas.removeEventListener("pointerup", onPointerUp);
+            canvas.removeEventListener("pointercancel", onPointerUp);
+            canvas.removeEventListener("pointermove", onPointerMove);
+            canvas.removeEventListener("wheel", onWheel);
         };
-    }, [cosmetic, selectedVariant, skinURL, skinType, webGLSupported]);
+    }, [webGLSupported]);
+
+    useEffect(() => {
+        cameraRef.current = cameraFor(cosmetic.type);
+    }, [cosmetic.type]);
+
+    useEffect(() => {
+        if (!renderer) return;
+        renderer.loadPlayer(PLAYER_SLOT, skinType === "slim");
+        renderer.loadAnimation(PLAYER_SLOT, IDLE_ANIMATION);
+        renderer.play(PLAYER_SLOT, performance.now() / 1000);
+    }, [renderer, skinType]);
+
+    useEffect(() => {
+        if (!renderer) return;
+        let cancelled = false;
+
+        fetchChecked(skinURL)
+            .then((res) => res.blob())
+            .then(createImageBitmap)
+            .then((image) => {
+                if (cancelled) return;
+                // Upgrades legacy 64x32 skins to the layout the player model expects.
+                const skin = document.createElement("canvas");
+                loadSkinToCanvas(skin, image);
+                renderer.setTexture(PLAYER_SLOT, skin);
+            })
+            .catch(console.error);
+
+        return () => {
+            cancelled = true;
+        };
+    }, [renderer, skinURL]);
+
+    // skinType is a dependency because reloading the player unbinds whatever hangs off it.
+    useEffect(() => {
+        if (!renderer) return;
+        let cancelled = false;
+
+        async function loadCosmetic(renderer: Renderer) {
+            const res = await fetchChecked(`${process.env.NEXT_PUBLIC_BACKEND_URL}/asset/${assetId}`);
+            const bytes = new Uint8Array(await res.arrayBuffer());
+
+            // Zips start with "PK". Anything else is a bare cape texture.
+            const files = bytes[0] === 0x50 && bytes[1] === 0x4b ? unzipSync(bytes) : { "cape.png": bytes };
+            const paths = Object.keys(files);
+            const [geometry, animation, texture, sheet] = renderer.bundleParts(paths).map((index) => paths[index]);
+            if (!texture) throw new Error(`Asset ${assetId} holds no texture`);
+
+            const decodeImage = (path: string) => createImageBitmap(new Blob([files[path] as BlobPart]));
+            const [image, sheetImage] = await Promise.all([decodeImage(texture), sheet ? decodeImage(sheet) : undefined]);
+            if (cancelled) return;
+
+            if (!geometry) {
+                renderer.loadCape(COSMETIC_SLOT, image, sheetImage, sheet);
+                return;
+            }
+
+            const decodeText = (path: string) => new TextDecoder().decode(files[path]);
+            // Either hand slot works for a glove: the renderer picks the arm from the geometry's side.
+            const bodySlot = cosmetic.type === "glove" ? "left_hand" : cosmetic.type;
+            renderer.loadCosmetic(COSMETIC_SLOT, decodeText(geometry), bodySlot, image);
+            if (animation) {
+                renderer.loadAnimation(COSMETIC_SLOT, decodeText(animation));
+                renderer.play(COSMETIC_SLOT, performance.now() / 1000);
+            }
+        }
+
+        loadCosmetic(renderer).catch(console.error);
+
+        return () => {
+            cancelled = true;
+            renderer.clear(COSMETIC_SLOT);
+        };
+    }, [renderer, assetId, cosmetic.type, skinType]);
 
     return (
         <>
@@ -181,11 +319,11 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
                                 {!webGLSupported ? (
                                     <img
                                         className="w-full h-full object-contain"
-                                        src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/asset/${cosmetic.variants?.filter((variant) => variant.model === skinType || !variant.model).find((variant) => variant.id === selectedVariant)?.coverAssetId ?? cosmetic.coverAssetId}`}
+                                        src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/asset/${variant?.coverAssetId ?? cosmetic.coverAssetId}`}
                                         alt={`Cover image for ${cosmetic.name}`}
                                     />
                                 ) : (
-                                    <canvas ref={canvasRef} className={`hover:cursor-pointer active:cursor-move`} />
+                                    <canvas ref={canvasRef} className="block w-full h-full touch-none hover:cursor-pointer active:cursor-move" />
                                 )}
                             </div>
                             {cosmetic.variants && cosmetic.variants.length > 1 && (
