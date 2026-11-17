@@ -36,7 +36,7 @@ export default function Items({ tags, initialItems, initialPages, initialTotal }
     const arg2 = router.query.items as string;
 
     const validArg1s = ["type", "category", "collection"];
-    const validTypes = ["cape", "wings", "glove", "hat", "boots", "backpack", "shoulder", "aura"];
+    const validTypes = ["cape", "wings", "glove", "hat", "boots", "backpack", "shoulder", "aura", "emote"];
 
     const [items, setItems] = useState<Item[]>(initialItems);
     const [pages, setPages] = useState<number>(initialPages);
@@ -204,6 +204,7 @@ export default function Items({ tags, initialItems, initialPages, initialTotal }
                                         name={cosmetic.name}
                                         id={cosmetic.id}
                                         coverId={cosmetic.coverAssetId}
+                                        previewUrl={cosmetic.previewUrl}
                                         price={cosmetic.price}
                                         discount={cosmetic.discount}
                                         newItem={isNewItem(cosmetic.createdAt)}
