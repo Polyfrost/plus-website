@@ -1,22 +1,19 @@
 {
     # nixpkgs dependencies
     lib,
-    stdenvNoCC,
     buildNpmPackage,
     nodejs,
     nodejs-slim,
     makeBinaryWrapper,
-    callPackage,
 
     # overridables
     # Points at the plus backend. Staging overrides this with
     # https://plus-staging.polyfrost.org.
     backendUrl ? "https://plus.polyfrost.org",
     originalSrc ? ./..,
-    skinview3d ? callPackage ./skinview3d.nix {},
 }:
 let
-    cleanSrc = lib.sources.cleanSourceWith {
+    src = lib.sources.cleanSourceWith {
         name = "plus-website-src";
         src = lib.sources.cleanSourceWith {
             src = originalSrc;
@@ -29,26 +26,6 @@ let
         };
         filter = lib.sources.cleanSourceFilter;
     };
-
-    # npm resolves the `github:` shorthand to git+ssh, which cannot be fetched
-    # inside the build sandbox (no ssh keys). Rewrite it to https.
-    src = stdenvNoCC.mkDerivation {
-        name = "plus-website-src-patched";
-        src = cleanSrc;
-
-        dontBuild = true;
-        dontFixup = true;
-
-        installPhase = ''
-            runHook preInstall
-
-            cp -r . "$out"
-            substituteInPlace "$out"/package-lock.json \
-                --replace-fail "git+ssh://git@github.com/" "git+https://github.com/"
-
-            runHook postInstall
-        '';
-    };
 in
 buildNpmPackage {
     pname = "plus-website";
@@ -56,13 +33,7 @@ buildNpmPackage {
 
     inherit src;
 
-    npmDepsHash = "sha256-But+a5kD0JIJMMAed6zqoPl6lFWT5MiDc9z3xfgfXrA=";
-
-    # skinview3d is a git dependency, which prefetch-npm-deps refuses unless
-    # explicitly allowed (git revs are not content-addressed by npm). npm also
-    # insists on repacking it, which needs a writable cache.
-    forceGitDeps = true;
-    makeCacheWritable = true;
+    npmDepsHash = "sha256-qcwMv6cp6GNOXr2q3QF5KKtjWorybi7MJWo+AmRnuEU=";
 
     # nodejs-slim ships no npm, so build with the full nodejs. Only the runtime
     # wrapper below uses nodejs-slim, keeping it out of the runtime closure.
@@ -71,14 +42,6 @@ buildNpmPackage {
     nativeBuildInputs = [
         makeBinaryWrapper
     ];
-
-    # npm ci unpacks skinview3d straight from its git tarball, so node_modules
-    # only holds its sources. Drop in the built output it would otherwise be
-    # missing. See ./skinview3d.nix.
-    postConfigure = ''
-        cp -r --no-preserve=mode ${skinview3d}/libs node_modules/skinview3d/libs
-        cp -r --no-preserve=mode ${skinview3d}/bundles node_modules/skinview3d/bundles
-    '';
 
     env = {
         NEXT_TELEMETRY_DISABLED = "1";
