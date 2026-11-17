@@ -32,7 +32,7 @@ export default function Search({ tags, initialItems, initialPages, initialTotal 
     const text = (router.query.text as string) || "";
     const sort = (router.query.sort as string) || "newest";
 
-    const validTypes = ["cape", "wings", "glove", "hat", "boots", "backpack", "shoulder", "aura"];
+    const validTypes = ["cape", "wings", "glove", "hat", "boots", "backpack", "shoulder", "aura", "emote"];
 
     const [items, setItems] = useState<Item[]>(initialItems);
     const [pages, setPages] = useState<number>(initialPages);
@@ -161,6 +161,7 @@ export default function Search({ tags, initialItems, initialPages, initialTotal 
                                         name={cosmetic.name}
                                         id={cosmetic.id}
                                         coverId={cosmetic.coverAssetId}
+                                        previewId={cosmetic.previewAssetId}
                                         price={cosmetic.price}
                                         discount={cosmetic.discount}
                                         newItem={isNewItem(cosmetic.createdAt)}

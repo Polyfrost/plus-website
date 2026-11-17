@@ -44,6 +44,7 @@ export async function getCosmeticById(id: number): Promise<Item> {
             id: json.id,
             assetId: json.asset_id,
             coverAssetId: json.cover_asset_id,
+            previewAssetId: json.preview_asset_id ?? undefined,
             tags: [...json.tags.custom, ...json.tags.colors],
             type: json.type,
             productId: json.store_product_id ?? undefined,
@@ -74,6 +75,7 @@ export async function searchCosmetics(queryItems: { [key: string]: string | numb
                 id: cosmetic.id,
                 assetId: cosmetic.asset_id,
                 coverAssetId: cosmetic.cover_asset_id,
+                previewAssetId: cosmetic.preview_asset_id ?? undefined,
                 tags: [...cosmetic.tags.custom, ...cosmetic.tags.colors],
                 type: cosmetic.type,
                 // Older backends omit this from search results, which just

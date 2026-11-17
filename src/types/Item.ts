@@ -9,6 +9,8 @@ export type Item = {
     createdAt: string;
     assetId: number;
     coverAssetId: number;
+    /** Looping animated webp, only for cosmetics that move. */
+    previewAssetId?: number;
     tags: string[];
     type: string;
     productId?: string;

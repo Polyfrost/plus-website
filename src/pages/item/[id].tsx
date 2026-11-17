@@ -44,6 +44,13 @@ const IDLE_ANIMATION = JSON.stringify({
     },
 });
 
+// Emotes usually play once in game, but the store preview should keep going.
+function looped(json: string) {
+    const file = JSON.parse(json);
+    for (const animation of Object.values<{ loop?: boolean }>(file.animations ?? {})) animation.loop = true;
+    return JSON.stringify(file);
+}
+
 async function fetchChecked(url: string) {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
@@ -260,6 +267,7 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
     useEffect(() => {
         if (!renderer) return;
         let cancelled = false;
+        const isEmote = cosmetic.type === "emote";
 
         async function loadCosmetic(renderer: Renderer) {
             const res = await fetchChecked(`${process.env.NEXT_PUBLIC_BACKEND_URL}/asset/${assetId}`);
@@ -269,6 +277,17 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
             const files = bytes[0] === 0x50 && bytes[1] === 0x4b ? unzipSync(bytes) : { "cape.png": bytes };
             const paths = Object.keys(files);
             const [geometry, animation, texture, sheet] = renderer.bundleParts(paths).map((index) => paths[index]);
+            const decodeText = (path: string) => new TextDecoder().decode(files[path]);
+
+            // An emote is only an animation, and it moves the player itself.
+            if (isEmote) {
+                if (!animation) throw new Error(`Asset ${assetId} holds no animation`);
+                if (cancelled) return;
+                renderer.loadAnimation(PLAYER_SLOT, looped(decodeText(animation)));
+                renderer.play(PLAYER_SLOT, performance.now() / 1000);
+                return;
+            }
+
             if (!texture) throw new Error(`Asset ${assetId} holds no texture`);
 
             const decodeImage = (path: string) => createImageBitmap(new Blob([files[path] as BlobPart]));
@@ -280,7 +299,6 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
                 return;
             }
 
-            const decodeText = (path: string) => new TextDecoder().decode(files[path]);
             // Either hand slot works for a glove: the renderer picks the arm from the geometry's side.
             const bodySlot = cosmetic.type === "glove" ? "left_hand" : cosmetic.type;
             renderer.loadCosmetic(COSMETIC_SLOT, decodeText(geometry), bodySlot, image);
@@ -295,6 +313,10 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
         return () => {
             cancelled = true;
             renderer.clear(COSMETIC_SLOT);
+            if (isEmote) {
+                renderer.loadAnimation(PLAYER_SLOT, IDLE_ANIMATION);
+                renderer.play(PLAYER_SLOT, performance.now() / 1000);
+            }
         };
     }, [renderer, assetId, cosmetic.type, skinType]);
 
@@ -418,6 +440,7 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
                                 name={cosmetic.name}
                                 id={cosmetic.id}
                                 coverId={cosmetic.coverAssetId}
+                                previewId={cosmetic.previewAssetId}
                                 price={cosmetic.price}
                                 discount={cosmetic.discount}
                                 newItem={isNewItem(cosmetic.createdAt)}

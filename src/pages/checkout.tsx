@@ -221,6 +221,7 @@ export default function Checkout({ editorsPick }: CheckoutProps) {
                                 name={cosmetic.name}
                                 id={cosmetic.id}
                                 coverId={cosmetic.coverAssetId}
+                                previewId={cosmetic.previewAssetId}
                                 price={cosmetic.price}
                                 discount={cosmetic.discount}
                                 newItem={isNewItem(cosmetic.createdAt)}
