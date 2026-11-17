@@ -11,15 +11,15 @@ export default function SearchBox({ className, onNavigate }: { className?: strin
     const router = useRouter();
     const id = useId();
     const [search, setSearch] = useState("");
-    const [results, setResults] = useState<Suggestions | null>(null);
+    const [results, setResults] = useState<{ text: string; data: Suggestions } | null>(null);
     const [open, setOpen] = useState(false);
     const [active, setActive] = useState(-1);
 
     useEffect(() => {
         const text = search.trim();
-        if (!text) return setResults(null);
+        if (!text) return;
         let stale = false;
-        const timer = setTimeout(() => suggestCosmetics(text).then((r) => !stale && setResults(r)), 250);
+        const timer = setTimeout(() => suggestCosmetics(text).then((data) => !stale && setResults({ text, data })), 250);
         return () => {
             stale = true;
             clearTimeout(timer);
@@ -32,15 +32,17 @@ export default function SearchBox({ className, onNavigate }: { className?: strin
     }, [active, id]);
 
     const text = search.trim();
+    // Results for an older query count as still loading, so the dropdown never shows a stale list.
+    const data = results?.text === text ? results.data : null;
     // One flat list in display order (tags, cosmetics, "see all") so arrow keys walk it top to bottom.
-    const options = results
+    const options = data
         ? [
-              ...results.tags.map((t) => `/search?tag=${encodeURIComponent(t.name)}`),
-              ...results.cosmetics.map((c) => `/item/${c.id}`),
-              ...(results.tags.length || results.cosmetics.length ? [`/search?text=${encodeURIComponent(text)}`] : []),
+              ...data.tags.map((t) => `/search?tag=${encodeURIComponent(t.name)}`),
+              ...data.cosmetics.map((c) => `/item/${c.id}`),
+              ...(data.tags.length || data.cosmetics.length ? [`/search?text=${encodeURIComponent(text)}`] : []),
           ]
         : [];
-    const expanded = open && !!text && !!results;
+    const expanded = open && !!text;
 
     const close = () => {
         setSearch("");
@@ -106,16 +108,23 @@ export default function SearchBox({ className, onNavigate }: { className?: strin
                     id={`${id}-list`}
                     role="listbox"
                     aria-label="Search suggestions"
+                    aria-busy={!data}
                     className="absolute top-full mt-2 w-full z-10 flex flex-col max-h-[min(24rem,60dvh)] overflow-y-auto overscroll-contain p-1.5 gap-1 bg-primary light:bg-primary-light border border-white/10 light:border-white/15 rounded-lg shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] light:shadow-[0px_6px_15px_0px_rgba(0,0,0,0.10)] text-sm"
                 >
-                    {results.tags.length > 0 && (
-                        <div role="group" aria-label="Tags" className="flex flex-row flex-wrap gap-1.5 px-1.5 py-1">
-                            {results.tags.map((tag, i) => option(i, "px-2 py-1 rounded-full! border border-white/10 light:border-white/15", tag.displayName))}
+                    {!data && (
+                        <div className="flex flex-row items-center gap-2 p-1.5 text-white/50 light:text-black/50">
+                            <div className="h-3.5 w-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                            Searching...
                         </div>
                     )}
-                    {results.cosmetics.map((c, j) =>
+                    {data && data.tags.length > 0 && (
+                        <div role="group" aria-label="Tags" className="flex flex-row flex-wrap gap-1.5 px-1.5 py-1">
+                            {data.tags.map((tag, i) => option(i, "px-2 py-1 rounded-full! border border-white/10 light:border-white/15", tag.displayName))}
+                        </div>
+                    )}
+                    {data?.cosmetics.map((c, j) =>
                         option(
-                            results.tags.length + j,
+                            data.tags.length + j,
                             "flex flex-row items-center gap-3 p-1.5",
                             <>
                                 <img
@@ -130,7 +139,7 @@ export default function SearchBox({ className, onNavigate }: { className?: strin
                             </>
                         )
                     )}
-                    {options.length === 0 ? (
+                    {!data ? null : options.length === 0 ? (
                         <p className="p-1.5 text-white/50 light:text-black/50">No cosmetics found</p>
                     ) : (
                         option(options.length - 1, "p-1.5 text-white/50 light:text-black/50 truncate", <>See all results for &quot;{text}&quot;</>)

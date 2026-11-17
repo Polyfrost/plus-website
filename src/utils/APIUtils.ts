@@ -169,13 +169,14 @@ export async function usernameToUUID(username: string): Promise<string | null> {
 
 export async function UUIDToSkinURL(uuid: string): Promise<{ skin: string; type: "slim" | "wide" }> {
     const mojangReq = await polyFetch(`https://mowojang.matdoes.dev/session/minecraft/profile/${uuid}`);
-    
+
     if (mojangReq.res?.ok && mojangReq.json) {
         const mojangProperties = mojangReq.json.properties as { name: string; value: string }[];
         const textureProperty = JSON.parse(Buffer.from(mojangProperties.find((prop) => prop.name === "textures")?.value ?? "{}", "base64").toString("utf-8"));
 
         return {
-            skin: textureProperty?.textures?.SKIN?.url ?? "https://textures.minecraft.net/texture/90b8789136facaa9f87b765140e1c8135e6652f513481bd84e6bd8c44844d7ce",
+            // Mojang hands out http texture urls, which an https page refuses to fetch.
+            skin: textureProperty?.textures?.SKIN?.url?.replace(/^http:/, "https:") ?? "https://textures.minecraft.net/texture/90b8789136facaa9f87b765140e1c8135e6652f513481bd84e6bd8c44844d7ce",
             type: textureProperty?.textures?.SKIN?.metadata?.model === "slim" ? "slim" : "wide",
         };
     } else {

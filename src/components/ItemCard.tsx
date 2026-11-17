@@ -27,6 +27,8 @@ export default function ItemCard({
     const router = useRouter();
     const cart = useCart();
     const [hovered, setHovered] = useState(false);
+    // Previews are transparent, so the cover hides only once the preview can replace it.
+    const [previewReady, setPreviewReady] = useState(false);
 
     const onSale = hasDiscount(discount);
     // A cosmetic with no price set cannot be bought.
@@ -35,7 +37,10 @@ export default function ItemCard({
     return (
         <div
             onPointerEnter={() => setHovered(true)}
-            onPointerLeave={() => setHovered(false)}
+            onPointerLeave={() => {
+                setHovered(false);
+                setPreviewReady(false);
+            }}
             className={`cursor-pointer flex flex-col h-fit ${width ? `${width}` : "w-45"} shrink-0 ${onSale ? "border border-green" : "border border-white/10 light:border-white/15"} relative bg-primary/35 hover:bg-primary/70 light:bg-primary-light/35 light:hover:bg-primary-light/70 duration-300 backdrop-blur-[32px] rounded-xl shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] light:shadow-[0px_6px_15px_0px_rgba(0,0,0,0.10)]`}
         >
             <button onClick={() => router.push(`/item/${id}`)} className="flex flex-col w-full">
@@ -52,7 +57,7 @@ export default function ItemCard({
                 <div className="flex flex-col gap-1.5 px-4 pt-4 pb-2.5">
                     <div className="relative h-40 w-full bg-primary/50 light:bg-primary-light/50 rounded-lg">
                         <img
-                            className="rounded-[5px] h-40 w-full border border-white/10 light:border-white/15 object-cover"
+                            className={`rounded-[5px] h-40 w-full border border-white/10 light:border-white/15 object-cover ${previewReady ? "invisible" : ""}`}
                             src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/asset/${coverId}`}
                             alt={`Cover image for ${name}`}
                         />
@@ -61,6 +66,7 @@ export default function ItemCard({
                             <img
                                 className="absolute inset-0 rounded-[5px] h-40 w-full border border-white/10 light:border-white/15 object-cover"
                                 src={previewUrl}
+                                onLoad={() => setPreviewReady(true)}
                                 alt=""
                             />
                         )}

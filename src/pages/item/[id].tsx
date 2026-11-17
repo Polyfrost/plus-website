@@ -44,10 +44,15 @@ const IDLE_ANIMATION = JSON.stringify({
     },
 });
 
-// Emotes usually play once in game, but the store preview should keep going.
+// Emotes usually play once in game, but the store preview should keep going,
+// holding the last frame for at least a second between loops.
 function looped(json: string) {
     const file = JSON.parse(json);
-    for (const animation of Object.values<{ loop?: boolean }>(file.animations ?? {})) animation.loop = true;
+    for (const animation of Object.values<{ loop?: boolean; loop_delay?: number | string }>(file.animations ?? {})) {
+        animation.loop = true;
+        // A Molang delay is the author's call, so only numbers get the floor.
+        if (typeof animation.loop_delay !== "string") animation.loop_delay = Math.max(1, animation.loop_delay ?? 0);
+    }
     return JSON.stringify(file);
 }
 
