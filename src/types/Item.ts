@@ -10,7 +10,7 @@ export type Item = {
     assetId: number;
     coverAssetId: number;
     /** Looping animated webp, only for cosmetics that move. */
-    previewAssetId?: number;
+    previewUrl?: string;
     tags: string[];
     type: string;
     productId?: string;

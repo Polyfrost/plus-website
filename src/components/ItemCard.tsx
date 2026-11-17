@@ -10,7 +10,7 @@ export default function ItemCard({
     newItem,
     id,
     coverId,
-    previewId,
+    previewUrl,
     price,
     discount,
     width,
@@ -19,7 +19,7 @@ export default function ItemCard({
     newItem?: boolean;
     id: number;
     coverId: number;
-    previewId?: number;
+    previewUrl?: string;
     price: number | null;
     discount?: number | null;
     width?: string;
@@ -57,10 +57,10 @@ export default function ItemCard({
                             alt={`Cover image for ${name}`}
                         />
                         {/* Mounted only on hover so the animation starts from its first frame and idle cards fetch nothing. */}
-                        {hovered && !!previewId && (
+                        {hovered && previewUrl && (
                             <img
                                 className="absolute inset-0 rounded-[5px] h-40 w-full border border-white/10 light:border-white/15 object-cover"
-                                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/asset/${previewId}`}
+                                src={previewUrl}
                                 alt=""
                             />
                         )}

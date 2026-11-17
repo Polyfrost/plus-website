@@ -161,7 +161,7 @@ export default function Search({ tags, initialItems, initialPages, initialTotal 
                                         name={cosmetic.name}
                                         id={cosmetic.id}
                                         coverId={cosmetic.coverAssetId}
-                                        previewId={cosmetic.previewAssetId}
+                                        previewUrl={cosmetic.previewUrl}
                                         price={cosmetic.price}
                                         discount={cosmetic.discount}
                                         newItem={isNewItem(cosmetic.createdAt)}
