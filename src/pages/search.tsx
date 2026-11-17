@@ -21,8 +21,9 @@ type SearchProps = {
 export const getServerSideProps: GetServerSideProps<SearchProps> = async ({ query }) => {
     const text = (query.text as string) || "";
     const sort = (query.sort as string) || "newest";
+    const tag = (query.tag as string) || "";
 
-    const [tags, data] = await Promise.all([getTags(), searchCosmetics({ text, sort, nb: 12, page: 1 }).catch(() => ({ items: [], total: 0, pages: 1 }))]);
+    const [tags, data] = await Promise.all([getTags(), searchCosmetics({ text, sort, tags: tag, nb: 12, page: 1 }).catch(() => ({ items: [], total: 0, pages: 1 }))]);
 
     return { props: toSerializable({ tags, initialItems: data.items, initialPages: data.pages, initialTotal: data.total }) };
 };
@@ -31,6 +32,8 @@ export default function Search({ tags, initialItems, initialPages, initialTotal 
     const router = useRouter();
     const text = (router.query.text as string) || "";
     const sort = (router.query.sort as string) || "newest";
+    const tagParam = (router.query.tag as string) || "";
+    const isColor = (name: string) => tags.find((t) => t.name === name)?.tagType === "color";
 
     const validTypes = ["cape", "wings", "glove", "hat", "boots", "backpack", "shoulder", "aura"];
 
@@ -39,8 +42,8 @@ export default function Search({ tags, initialItems, initialPages, initialTotal 
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalItems, setTotalItems] = useState<number>(initialTotal);
 
-    const [selectedTags, setSelectedTags] = useState<string[]>([]);
-    const [selectedColors, setSelectedColors] = useState<string[]>([]);
+    const [selectedTags, setSelectedTags] = useState<string[]>(tagParam && !isColor(tagParam) ? [tagParam] : []);
+    const [selectedColors, setSelectedColors] = useState<string[]>(tagParam && isColor(tagParam) ? [tagParam] : []);
     const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
 
     const [paginating, setPaginating] = useState<boolean>(false);
@@ -69,6 +72,14 @@ export default function Search({ tags, initialItems, initialPages, initialTotal 
 
         handleCosmeticSearch(1);
     }, [text, sort, selectedTags, selectedColors, selectedTypes]);
+
+    // Navbar tag suggestions link to /search?tag=..., which is a client-side nav when already on this page.
+    useEffect(() => {
+        if (!tagParam) return;
+        const only = (prev: string[]) => (prev.length === 1 && prev[0] === tagParam ? prev : [tagParam]);
+        if (isColor(tagParam)) setSelectedColors(only);
+        else setSelectedTags(only);
+    }, [tagParam]);
 
     useEffect(() => {
         if (inView && currentPage < pages && !paginating) {

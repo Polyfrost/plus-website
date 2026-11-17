@@ -4,9 +4,8 @@ import Button from "./Button";
 import BurgerIcon from "./icons/Burger";
 import CartIcon from "./icons/Cart";
 import NightIcon from "./icons/Night";
-import SearchIcon from "./icons/Search";
 import Logo from "./Logo";
-import TextInput from "./TextInput";
+import SearchBox from "./SearchBox";
 import DayIcon from "./icons/Day";
 import NavbarTypeButton from "./NavbarTypeButton";
 import { useRouter } from "next/router";
@@ -19,8 +18,6 @@ export default function Navbar({ atTop }: { atTop: boolean }) {
     const router = useRouter();
     const cart = useCart();
 
-    const [search, setSearch] = useState("");
-
     return (
         <header
             className={`fixed z-150 top-0 w-full transition-all duration-300 ease-out ${atTop && !extended ? "bg-transparent border-b border-b-transparent py-6" : "bg-primary/45 light:bg-primary-light/45 border-b border-b-white/10 light:border-b-white/15 py-4 backdrop-blur-[32px] shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] light:shadow-[0px_6px_15px_0px_rgba(0,0,0,0.10)]"}`}
@@ -31,19 +28,7 @@ export default function Navbar({ atTop }: { atTop: boolean }) {
                         <button onClick={() => router.push("/")} className="flex">
                             <Logo className="w-auto h-8 self-center" />
                         </button>
-                        <TextInput
-                            icon={<SearchIcon className="w-4.5 h-4.5 text-white/50 light:text-black/50" />}
-                            placeholder="Search Cosmetics..."
-                            className="w-fit min-[940px]:block hidden"
-                            value={search}
-                            onChange={setSearch}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                    setSearch("");
-                                    router.push(`/search${!search.trim() ? "" : `?text=${encodeURIComponent(search)}`}`, undefined, { shallow: true });
-                                }
-                            }}
-                        />
+                        <SearchBox className="flex-1 max-w-120 min-[940px]:block hidden" />
                         <div className="flex-row gap-3 min-[940px]:flex hidden">
                             <Button
                                 icon={
@@ -77,20 +62,7 @@ export default function Navbar({ atTop }: { atTop: boolean }) {
                     </div>
                     {extended && (
                         <div className="flex flex-col w-full gap-3 pt-2">
-                            <TextInput
-                                icon={<SearchIcon className="w-4.5 h-4.5 text-white/50 light:text-black/50" />}
-                                placeholder="Search Cosmetics..."
-                                className="w-full"
-                                value={search}
-                                onChange={setSearch}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        if (!search.trim()) return;
-                                        setSearch("");
-                                        router.push(`/search?text=${encodeURIComponent(search)}`, undefined, { shallow: true });
-                                    }
-                                }}
-                            />
+                            <SearchBox className="w-full" onNavigate={() => setExtended(false)} />
                             <div className="flex flex-row gap-3 w-full">
                                 <Button
                                     icon={

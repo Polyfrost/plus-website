@@ -94,6 +94,17 @@ export async function searchCosmetics(queryItems: { [key: string]: string | numb
     }
 }
 
+export type Suggestions = { tags: ItemTag[]; cosmetics: { id: number; name: string; type: string; coverAssetId: number | null }[] };
+
+export async function suggestCosmetics(text: string): Promise<Suggestions> {
+    const { res, json } = await polyFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cosmetics/suggest?text=${encodeURIComponent(text)}`);
+    if (!res?.ok || !json) return { tags: [], cosmetics: [] };
+    return {
+        tags: json.tags.map((tag: any) => ({ name: tag.name, displayName: tag.display_name ?? tag.name, tagType: tag.tag_type })),
+        cosmetics: json.cosmetics.map((c: any) => ({ id: c.id, name: c.name, type: c.type, coverAssetId: c.cover_asset_id })),
+    };
+}
+
 export async function getTags(): Promise<ItemTag[]> {
     const { res, json } = await polyFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/tags/list`);
     if (res?.ok && json) {

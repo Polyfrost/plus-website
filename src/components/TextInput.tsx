@@ -5,6 +5,7 @@ export default function TextInput({
     value,
     onChange,
     onKeyDown,
+    inputProps,
 }: {
     icon?: React.ReactNode;
     placeholder: string;
@@ -12,6 +13,7 @@ export default function TextInput({
     value: string;
     onChange: (value: string) => void;
     onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+    inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
 }) {
     return (
         <div className={`${className} relative items-center shadow-[0px_6px_15px_0px_rgba(0,0,0,0.15)] light:shadow-[0px_6px_15px_0px_rgba(0,0,0,0.10)] rounded-lg`}>
@@ -22,6 +24,7 @@ export default function TextInput({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 onKeyDown={onKeyDown}
+                {...inputProps}
             />
         </div>
     );
