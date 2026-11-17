@@ -146,17 +146,17 @@ export async function createCheckout(uuid: string, products: string[], promoCode
 }
 
 export async function usernameToUUID(username: string): Promise<string | null> {
-    const { res, json } = await polyFetch(`https://playerdb.co/api/player/minecraft/${username}`);
-    if (res?.ok && json) {
-        return json.data.player.id;
+    const { res, json } = await polyFetch(`https://mowojang.matdoes.dev/${encodeURIComponent(username)}`);
+    if (res?.ok && json?.id) {
+        return (json.id as string).replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, "$1-$2-$3-$4-$5");
     } else {
         return null;
     }
 }
 
 export async function UUIDToSkinURL(uuid: string): Promise<{ skin: string; type: "slim" | "wide" }> {
-    const mojangReq = await polyFetch(`https://mowojang.seraph.si/session/minecraft/profile/${uuid}`);
-
+    const mojangReq = await polyFetch(`https://mowojang.matdoes.dev/session/minecraft/profile/${uuid}`);
+    
     if (mojangReq.res?.ok && mojangReq.json) {
         const mojangProperties = mojangReq.json.properties as { name: string; value: string }[];
         const textureProperty = JSON.parse(Buffer.from(mojangProperties.find((prop) => prop.name === "textures")?.value ?? "{}", "base64").toString("utf-8"));
