@@ -157,6 +157,7 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
         let disposed = false;
         let frame = 0;
         let dragging = false;
+        let hovering = false;
         let lastMs: number | undefined;
 
         // The wasm instance belongs to this renderer and is collected with it.
@@ -166,7 +167,7 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
                 setRenderer(created);
 
                 const draw = (ms: number) => {
-                    if (!dragging && lastMs !== undefined) cameraRef.current.yaw += ((ms - lastMs) / 1000) * SPIN_DEGREES_PER_SECOND;
+                    if (!dragging && !hovering && lastMs !== undefined) cameraRef.current.yaw += ((ms - lastMs) / 1000) * SPIN_DEGREES_PER_SECOND;
                     lastMs = ms;
                     created.draw(cameraRef.current, ms / 1000);
                     frame = requestAnimationFrame(draw);
@@ -178,6 +179,12 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
                 setWebGLSupported(false);
             });
 
+        const onPointerEnter = (e: PointerEvent) => {
+            hovering = true;
+        };
+        const onPointerLeave = (e: PointerEvent) => {
+            hovering = false;
+        };
         const onPointerDown = (e: PointerEvent) => {
             dragging = true;
             canvas.setPointerCapture(e.pointerId);
@@ -187,7 +194,7 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
             if (!dragging) return;
             const camera = cameraRef.current;
             camera.yaw += e.movementX * 0.6;
-            camera.pitch = Math.min(89, Math.max(-89, camera.pitch - e.movementY * 0.4));
+            camera.pitch = Math.min(89, Math.max(-89, camera.pitch + e.movementY * 0.4));
         };
         const onWheel = (e: WheelEvent) => {
             e.preventDefault();
@@ -195,6 +202,8 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
             camera.distance = Math.min(160, Math.max(25, camera.distance * Math.exp(e.deltaY * 0.001)));
         };
 
+        canvas.addEventListener("pointerenter", onPointerEnter);
+        canvas.addEventListener("pointerleave", onPointerLeave);
         canvas.addEventListener("pointerdown", onPointerDown);
         canvas.addEventListener("pointerup", onPointerUp);
         canvas.addEventListener("pointercancel", onPointerUp);
@@ -205,6 +214,8 @@ export default function Id({ cosmetic, similarCosmetics }: IdProps) {
             disposed = true;
             cancelAnimationFrame(frame);
             setRenderer(null);
+            canvas.removeEventListener("pointerenter", onPointerEnter);
+            canvas.removeEventListener("pointerleave", onPointerLeave);
             canvas.removeEventListener("pointerdown", onPointerDown);
             canvas.removeEventListener("pointerup", onPointerUp);
             canvas.removeEventListener("pointercancel", onPointerUp);
